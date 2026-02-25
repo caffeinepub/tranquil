@@ -1,0 +1,86 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-25T04:36:21.760Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 2,
+    "implemented": 0,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Ensure all color tokens, backgrounds, text colors, accent colors, and component styles are consistently applied across all screen sizes (mobile, tablet, desktop) — no visual discrepancies between breakpoints. All pages (Dashboard, Breathe, Sounds, Journal, Analytics, Profile, Settings, Sleep, VibrationControl, TipsAndReminders) must render with identical color themes regardless of viewport width.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/index.css",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/BottomNav.tsx",
+          "frontend/src/components/StressGauge.tsx",
+          "frontend/src/components/StressChart.tsx",
+          "frontend/src/components/TipCard.tsx",
+          "frontend/src/components/SoundTile.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Breathe.tsx",
+          "frontend/src/pages/Sounds.tsx",
+          "frontend/src/pages/Journal.tsx",
+          "frontend/src/pages/Analytics.tsx",
+          "frontend/src/pages/Profile.tsx",
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/pages/SleepTracking.tsx",
+          "frontend/src/pages/VibrationControl.tsx",
+          "frontend/src/pages/TipsAndReminders.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Make the app fully responsive across all screen sizes (mobile 320px+, tablet 768px+, desktop 1024px+). All layouts, grids, cards, charts, and navigation elements must adapt gracefully. Pages with fixed widths or overflowing content must be corrected. The bottom navigation should remain on mobile/tablet, and a sidebar or top navigation may be introduced for desktop if appropriate.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/Layout.tsx",
+          "frontend/src/components/Header.tsx",
+          "frontend/src/components/BottomNav.tsx",
+          "frontend/src/components/StressGauge.tsx",
+          "frontend/src/components/StressChart.tsx",
+          "frontend/src/components/BreathingCircle.tsx",
+          "frontend/src/components/ProfileStats.tsx",
+          "frontend/src/components/MoodSelector.tsx",
+          "frontend/src/components/SoundTile.tsx",
+          "frontend/src/components/TipCard.tsx",
+          "frontend/src/components/ProfileSetupModal.tsx",
+          "frontend/src/components/EmergencyCalmOverlay.tsx",
+          "frontend/src/components/IntensitySlider.tsx",
+          "frontend/src/components/StarRating.tsx",
+          "frontend/src/components/AvatarSelector.tsx",
+          "frontend/src/components/ReminderToggle.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/Breathe.tsx",
+          "frontend/src/pages/Sounds.tsx",
+          "frontend/src/pages/Journal.tsx",
+          "frontend/src/pages/Analytics.tsx",
+          "frontend/src/pages/Profile.tsx",
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/pages/SleepTracking.tsx",
+          "frontend/src/pages/VibrationControl.tsx",
+          "frontend/src/pages/TipsAndReminders.tsx",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/LoginScreen.tsx"
+        ],
+        "matchedFiles": []
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-implementation-plan.json",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

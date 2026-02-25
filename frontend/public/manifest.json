@@ -1,0 +1,25 @@
+{
+  "name": "TRANQUIL",
+  "short_name": "TRANQUIL",
+  "description": "Your personal wellness and stress management companion.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#2a9d8f",
+  "background_color": "#0f1a18",
+  "categories": ["health", "lifestyle", "wellness"],
+  "icons": [
+    {
+      "src": "/assets/generated/icon-192.dim_192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/generated/icon-512.dim_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

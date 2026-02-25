@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 1rem;
+
+    /* TRANQUIL Calming Palette - Light Mode */
+    --background: 0.97 0.008 220;
+    --foreground: 0.22 0.04 250;
+
+    --card: 0.99 0.004 220;
+    --card-foreground: 0.22 0.04 250;
+
+    --popover: 0.99 0.004 220;
+    --popover-foreground: 0.22 0.04 250;
+
+    /* Lavender primary */
+    --primary: 0.62 0.12 290;
+    --primary-foreground: 0.99 0.004 220;
+
+    /* Mint secondary */
+    --secondary: 0.88 0.06 165;
+    --secondary-foreground: 0.22 0.04 250;
+
+    --muted: 0.93 0.015 220;
+    --muted-foreground: 0.52 0.04 250;
+
+    /* Light blue accent */
+    --accent: 0.88 0.06 220;
+    --accent-foreground: 0.22 0.04 250;
+
+    --destructive: 0.62 0.18 25;
+    --destructive-foreground: 0.99 0 0;
+
+    --border: 0.88 0.02 220;
+    --input: 0.92 0.015 220;
+    --ring: 0.62 0.12 290;
+
+    /* Stress level colors */
+    --stress-low: 0.72 0.12 165;
+    --stress-medium: 0.72 0.1 290;
+    --stress-high: 0.65 0.18 25;
+
+    /* Chart colors */
+    --chart-1: 0.72 0.12 165;
+    --chart-2: 0.72 0.1 290;
+    --chart-3: 0.65 0.18 25;
+    --chart-4: 0.72 0.1 220;
+    --chart-5: 0.78 0.08 200;
+
+    --sidebar: 0.99 0.004 220;
+    --sidebar-foreground: 0.22 0.04 250;
+    --sidebar-primary: 0.62 0.12 290;
+    --sidebar-primary-foreground: 0.99 0.004 220;
+    --sidebar-accent: 0.88 0.06 220;
+    --sidebar-accent-foreground: 0.22 0.04 250;
+    --sidebar-border: 0.88 0.02 220;
+    --sidebar-ring: 0.62 0.12 290;
+  }
+
+  .dark {
+    --background: 0.14 0.03 250;
+    --foreground: 0.93 0.015 220;
+
+    --card: 0.18 0.035 250;
+    --card-foreground: 0.93 0.015 220;
+
+    --popover: 0.2 0.035 250;
+    --popover-foreground: 0.93 0.015 220;
+
+    --primary: 0.72 0.12 290;
+    --primary-foreground: 0.14 0.03 250;
+
+    --secondary: 0.25 0.04 250;
+    --secondary-foreground: 0.93 0.015 220;
+
+    --muted: 0.22 0.035 250;
+    --muted-foreground: 0.62 0.04 250;
+
+    --accent: 0.25 0.05 220;
+    --accent-foreground: 0.93 0.015 220;
+
+    --destructive: 0.65 0.18 25;
+    --destructive-foreground: 0.99 0 0;
+
+    --border: 0.28 0.04 250;
+    --input: 0.25 0.04 250;
+    --ring: 0.72 0.12 290;
+
+    --stress-low: 0.72 0.14 165;
+    --stress-medium: 0.72 0.12 290;
+    --stress-high: 0.68 0.2 25;
+
+    --chart-1: 0.72 0.14 165;
+    --chart-2: 0.72 0.12 290;
+    --chart-3: 0.68 0.2 25;
+    --chart-4: 0.72 0.12 220;
+    --chart-5: 0.78 0.1 200;
+
+    --sidebar: 0.18 0.035 250;
+    --sidebar-foreground: 0.93 0.015 220;
+    --sidebar-primary: 0.72 0.12 290;
+    --sidebar-primary-foreground: 0.14 0.03 250;
+    --sidebar-accent: 0.25 0.05 220;
+    --sidebar-accent-foreground: 0.93 0.015 220;
+    --sidebar-border: 0.28 0.04 250;
+    --sidebar-ring: 0.72 0.12 290;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Nunito', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+  }
+}
+
+@layer utilities {
+  .stress-low { color: oklch(var(--stress-low)); }
+  .stress-medium { color: oklch(var(--stress-medium)); }
+  .stress-high { color: oklch(var(--stress-high)); }
+
+  .bg-stress-low { background-color: oklch(var(--stress-low)); }
+  .bg-stress-medium { background-color: oklch(var(--stress-medium)); }
+  .bg-stress-high { background-color: oklch(var(--stress-high)); }
+
+  .border-stress-low { border-color: oklch(var(--stress-low)); }
+  .border-stress-medium { border-color: oklch(var(--stress-medium)); }
+  .border-stress-high { border-color: oklch(var(--stress-high)); }
+
+  .tranquil-gradient {
+    background: linear-gradient(135deg, oklch(0.88 0.06 220), oklch(0.88 0.06 290), oklch(0.88 0.06 165));
+  }
+
+  .tranquil-gradient-dark {
+    background: linear-gradient(135deg, oklch(0.22 0.05 220), oklch(0.22 0.05 290), oklch(0.22 0.05 165));
+  }
+
+  .glass-card {
+    background: oklch(var(--card) / 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Breathing animation */
+@keyframes breathe-in {
+  from { transform: scale(0.7); opacity: 0.7; }
+  to { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes breathe-out {
+  from { transform: scale(1.2); opacity: 1; }
+  to { transform: scale(0.7); opacity: 0.7; }
+}
+
+@keyframes breathe-hold {
+  from { transform: scale(1.2); }
+  to { transform: scale(1.2); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 0.4; }
+  100% { transform: scale(0.8); opacity: 0.8; }
+}
+
+@keyframes sound-wave {
+  0%, 100% { height: 4px; }
+  50% { height: 20px; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-breathe-in {
+  animation: breathe-in ease-in-out forwards;
+}
+
+.animate-breathe-out {
+  animation: breathe-out ease-in-out forwards;
+}
+
+.animate-breathe-hold {
+  animation: breathe-hold ease-in-out forwards;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out forwards;
+}
+
+.sound-bar {
+  animation: sound-wave 0.8s ease-in-out infinite;
+}
+
+.sound-bar:nth-child(2) { animation-delay: 0.1s; }
+.sound-bar:nth-child(3) { animation-delay: 0.2s; }
+.sound-bar:nth-child(4) { animation-delay: 0.3s; }
+.sound-bar:nth-child(5) { animation-delay: 0.15s; }

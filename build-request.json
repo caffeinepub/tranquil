@@ -1,0 +1,64 @@
+{
+  "kind": "build_request",
+  "title": "Match mobile UI colors to desktop and improve cross-device responsiveness",
+  "projectName": "TRANQUIL",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Ensure all color tokens, backgrounds, text colors, accent colors, and component styles are consistently applied across all screen sizes (mobile, tablet, desktop) — no visual discrepancies between breakpoints. All pages (Dashboard, Breathe, Sounds, Journal, Analytics, Profile, Settings, Sleep, VibrationControl, TipsAndReminders) must render with identical color themes regardless of viewport width.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Make it same as in desktop too like colors and responsive"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Color tokens defined in frontend/src/index.css and frontend/index.css are applied uniformly at all breakpoints",
+        "Dark and light mode colors match between mobile and desktop viewports on all pages",
+        "No page has a different background, card, or text color on mobile vs desktop",
+        "Gradient, accent, and chart colors are consistent across all screen sizes"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Make the app fully responsive across all screen sizes (mobile 320px+, tablet 768px+, desktop 1024px+). All layouts, grids, cards, charts, and navigation elements must adapt gracefully. Pages with fixed widths or overflowing content must be corrected. The bottom navigation should remain on mobile/tablet, and a sidebar or top navigation may be introduced for desktop if appropriate.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Make it same as in desktop too like colors and responsive"
+        ]
+      },
+      "acceptanceCriteria": [
+        "No horizontal scrollbar or overflow on any page at any standard viewport width",
+        "Grid layouts (e.g., sound tiles, stats cards) reflow correctly from 1-column mobile to 2–3 column desktop",
+        "StressChart, StressGauge, and all Recharts visualizations resize fluidly without clipping",
+        "Header and BottomNav are correctly positioned and sized on mobile, tablet, and desktop",
+        "Typography scales appropriately across breakpoints using Tailwind responsive classes",
+        "All forms, sliders, and modals (e.g., ProfileSetupModal) are usable and correctly sized on all screen widths",
+        "EmergencyCalmOverlay fills the screen correctly on all device sizes"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Do not change the backend schema or Motoko logic",
+    "Preserve all existing design tokens and OKLCH color palette — only fix inconsistent application of them"
+  ],
+  "nonGoals": [
+    "Adding new features or pages",
+    "Changing the visual design language or color palette itself",
+    "Adding Internet Identity login changes",
+    "Backend modifications"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Match desktop colors and make the app fully responsive across all screen sizes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Ensure all color tokens, backgrounds, text colors, accent colors, and component styles are consistently applied across all screen sizes (mobile, tablet, desktop) — no visual discrepancies between breakpoints. All pages (Dashboard, Breathe, Sounds, Journal, Analytics, Profile, Settings, Sleep, VibrationControl, TipsAndReminders) must render with identical color themes regardless of viewport width.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Make the app fully responsive across all screen sizes (mobile 320px+, tablet 768px+, desktop 1024px+). All layouts, grids, cards, charts, and navigation elements must adapt gracefully. Pages with fixed widths or overflowing content must be corrected. The bottom navigation should remain on mobile/tablet, and a sidebar or top navigation may be introduced for desktop if appropriate.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "TRANQUIL",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
