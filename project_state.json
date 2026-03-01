@@ -1,70 +1,60 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 5,
-  "summary": "TRANQUIL is a cross-platform mobile app connecting to a stress-relief wearable band via BLE. It features advanced privacy controls, secure data handling, full account/selective data deletion, data download (JSON/CSV/PDF), a Privacy Dashboard, AES-256 encryption, Firebase Security Rules, MFA, biometric re-auth, GDPR/Indian IT compliance, and a secure Cloud Function backend deletion flow.",
+  "summary": "A mental wellness app (TRANQUIL) with full responsiveness, consistent color theming, and a comprehensive Privacy & Data Control section inside Settings — featuring full account deletion with re-auth/biometric confirmation, selective data deletion, data download (JSON/CSV/PDF), AES-256 encryption, Firebase Security Rules, MFA, GDPR and Indian IT compliance, and privacy-first UI design.",
   "architectural_notes": [
-    "BLE connectivity for stress-relief wearable band with end-to-end encryption",
-    "Firebase Firestore + Firebase Authentication as primary backend, with secure Cloud Functions for deletion",
-    "AES-256 encryption for all stored sensitive mental health data",
-    "Soft delete with 7-day recovery grace period before permanent erasure"
+    "Firebase Firestore + Firebase Authentication used as backend; account deletion must trigger a secure Cloud Function to remove all user data and invalidate sessions within 30 seconds.",
+    "AES-256 encryption required for all stored data; encrypted BLE communication for device interactions; HTTPS for all backend calls.",
+    "GDPR and Indian IT Act compliance required: user consent tracking, Privacy Policy integration, Terms & Conditions acceptance logging."
   ],
   "known_issues": [],
   "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Abstract calming gradient background with soft teal, deep indigo, and sage green organic blobs on a dark navy base, no text (privacy-dashboard-bg.dim_1200x800.png)\n- TRANQUIL app logo mark — a minimal outlined lotus or wave symbol in soft teal on transparent background (tranquil-logo-mark.dim_256x256.png)",
   "existing_features": [
     {
-      "id": "feature-implement-a-privacy-dashboard-page-route-privacy-accessible-from-the-settings-page-and-the-profile-page-the-dashboard-must-display-a-stored-data-summary-counts-of-stress-logs-mood-entries-sleep-entries-breathing-sessions-device-pairing-records-a-plain-language-data-usage-explanation-section-toggles-for-analytics-tracking-and-ai-prediction-usage-persisted-to-the-backend-user-profile-a-manage-connected-devices-section-listing-paired-devices-with-individual-remove-buttons-and-a-prominently-styled-red-delete-account-button-at-the-bottom-the-page-must-follow-the-tranquil-design-system-oklch-palette-nunito-quicksand-fonts-dark-light-theme-support-and-be-fully-responsive-from-320-px-mobile-through-desktop",
-      "title": "Implement a Privacy Dashboard page (route: /privacy) accessible from the Settings page and the Profile page. The dashboard must display: a stored data summary (counts of stress logs, mood entries, sleep entries, breathing sessions, device pairing records); a plain-language data usage explanation section; toggles for analytics tracking and AI prediction usage (persisted to the backend user profile); a 'Manage Connected Devices' section listing paired devices with individual remove buttons; and a prominently styled red 'Delete Account' button at the bottom. The page must follow the TRANQUIL design system (OKLCH palette, Nunito/Quicksand fonts, dark/light theme support) and be fully responsive from 320 px mobile through desktop.",
+      "id": "feature-add-a-privacy-data-control-section-inside-the-settings-page-this-section-must-contain-clearly-labeled-sub-sections-for-full-account-deletion-selective-data-deletion-and-download-my-data-use-a-calm-blue-teal-theme-consistent-with-the-existing-design-tokens-clear-plain-english-labels-and-no-dark-patterns",
+      "title": "Add a 'Privacy & Data Control' section inside the Settings page. This section must contain clearly labeled sub-sections for Full Account Deletion, Selective Data Deletion, and Download My Data. Use a calm blue/teal theme consistent with the existing design tokens, clear plain-English labels, and no dark patterns.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-a-full-account-deletion-flow-in-the-privacy-dashboard-when-the-user-clicks-delete-my-account-display-a-modal-warning-with-the-exact-text-this-action-is-permanent-and-cannot-be-undone-and-a-secondary-message-explaining-that-all-data-profile-stress-logs-mood-journal-sleep-data-device-pairing-history-will-be-deleted-require-the-user-to-type-delete-to-confirm-on-confirmation-call-a-backend-function-that-marks-the-account-for-deletion-soft-delete-flag-with-a-30-day-grace-period-timestamp-immediately-clear-all-locally-cached-data-and-log-the-user-out-display-a-toast-confirming-deletion-initiation-the-entire-ui-flow-must-complete-within-30-seconds-add-a-corresponding-backend-motoko-function-requestaccountdeletion-userid-that-sets-a-pendingdeletion-flag-and-deletionscheduledat-timestamp-on-the-user-record",
-      "title": "Implement a full account deletion flow. In the Privacy Dashboard, when the user clicks 'Delete My Account', display a modal warning with the exact text 'This action is permanent and cannot be undone.' and a secondary message explaining that all data (profile, stress logs, mood journal, sleep data, device pairing history) will be deleted. Require the user to type 'DELETE' to confirm. On confirmation, call a backend function that marks the account for deletion (soft-delete flag with a 30-day grace period timestamp). Immediately clear all locally cached data and log the user out. Display a toast confirming deletion initiation. The entire UI flow must complete within 30 seconds. Add a corresponding backend Motoko function `requestAccountDeletion(userId)` that sets a `pendingDeletion` flag and `deletionScheduledAt` timestamp on the user record.",
+      "id": "feature-implement-a-full-account-deletion-flow-inside-the-privacy-data-control-section-show-a-red-delete-account-button-on-click-open-the-existing-deleteaccountmodal-or-enhance-it-to-1-require-password-re-authentication-2-support-biometric-confirmation-via-the-existing-usebiometricauth-hook-3-display-the-warning-this-action-is-permanent-and-cannot-be-undone-4-offer-an-optional-7-day-recovery-period-toggle-before-confirming-on-confirmation-delete-all-user-data-from-the-backend-profile-stress-logs-mood-logs-sleep-data-device-history-by-calling-the-appropriate-backend-actor-methods-log-a-deletion-event-without-personal-data-and-invalidate-all-active-react-query-sessions",
+      "title": "Implement a Full Account Deletion flow inside the Privacy & Data Control section. Show a red 'Delete Account' button. On click, open the existing DeleteAccountModal (or enhance it) to: (1) require password re-authentication, (2) support biometric confirmation via the existing useBiometricAuth hook, (3) display the warning 'This action is permanent and cannot be undone.', (4) offer an optional 7-day recovery period toggle before confirming. On confirmation, delete all user data from the backend (profile, stress logs, mood logs, sleep data, device history) by calling the appropriate backend actor methods, log a deletion event without personal data, and invalidate all active React Query sessions.",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-selective-data-deletion-controls-in-the-privacy-dashboard-add-a-manage-my-data-section-with-the-following-individual-deletion-actions-1-delete-a-specific-stress-log-entry-each-stress-log-in-the-existing-list-views-must-have-a-delete-icon-that-calls-the-backend-deletestressreading-id-function-2-delete-a-specific-mood-journal-entry-each-mood-entry-in-the-journal-page-must-have-a-delete-icon-that-calls-the-backend-deletemoodentry-id-function-3-clear-all-analytics-history-weekly-monthly-a-clear-analytics-history-button-that-calls-a-backend-function-clearanalyticshistory-deleting-all-stress-readings-for-the-user-4-reset-device-pairing-data-without-deleting-the-account-a-reset-device-data-button-that-calls-cleardevicepairings-on-the-backend-all-destructive-actions-must-show-a-brief-inline-confirmation-are-you-sure-before-executing-backend-must-implement-or-expose-these-deletion-functions-in-the-main-motoko-actor",
-      "title": "Implement selective data deletion controls. In the Privacy Dashboard, add a 'Manage My Data' section with the following individual deletion actions: (1) Delete a specific stress log entry — each stress log in the existing list views must have a delete icon that calls the backend `deleteStressReading(id)` function; (2) Delete a specific mood journal entry — each mood entry in the Journal page must have a delete icon that calls the backend `deleteMoodEntry(id)` function; (3) Clear all analytics history (weekly/monthly) — a 'Clear Analytics History' button that calls a backend function `clearAnalyticsHistory()` deleting all stress readings for the user; (4) Reset device pairing data without deleting the account — a 'Reset Device Data' button that calls `clearDevicePairings()` on the backend. All destructive actions must show a brief inline confirmation ('Are you sure?') before executing. Backend must implement or expose these deletion functions in the main Motoko actor.",
+      "id": "feature-implement-selective-data-deletion-inside-the-privacy-data-control-section-using-the-existing-selectivedatadeletioncard-component-or-an-enhanced-version-users-must-be-able-to-independently-delete-individual-stress-log-entries-individual-mood-entries-all-analytics-history-and-device-pairing-data-each-action-must-show-a-confirmation-dialog-before-executing-and-display-a-toast-notification-on-success-or-failure",
+      "title": "Implement Selective Data Deletion inside the Privacy & Data Control section using the existing SelectiveDataDeletionCard component (or an enhanced version). Users must be able to independently delete: individual stress log entries, individual mood entries, all analytics history, and device pairing data. Each action must show a confirmation dialog before executing and display a toast notification on success or failure.",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-enhance-the-existing-data-export-feature-in-settings-to-support-three-export-formats-json-already-partially-implemented-in-frontend-src-utils-dataexport-ts-csv-and-a-structured-pdf-summary-report-add-a-format-selector-radio-group-or-segmented-control-json-csv-pdf-before-the-download-button-the-json-export-must-include-all-user-data-profile-stress-readings-mood-entries-sleep-entries-breathing-sessions-the-csv-export-must-produce-a-flat-spreadsheet-of-stress-readings-with-columns-date-stressscore-heartrate-skintemp-motion-the-pdf-export-must-generate-a-formatted-summary-report-with-the-user-s-name-avatar-total-sessions-average-stress-score-mood-trend-and-a-7-day-stress-chart-as-text-based-ascii-or-table-all-exports-must-be-triggered-as-in-app-browser-downloads-extend-frontend-src-utils-dataexport-ts-with-exportascsv-and-exportaspdf-utility-functions",
-      "title": "Enhance the existing data export feature in Settings to support three export formats: JSON (already partially implemented in `frontend/src/utils/dataExport.ts`), CSV, and a structured PDF summary report. Add a format selector (radio group or segmented control: JSON / CSV / PDF) before the download button. The JSON export must include all user data (profile, stress readings, mood entries, sleep entries, breathing sessions). The CSV export must produce a flat spreadsheet of stress readings with columns: date, stressScore, heartRate, skinTemp, motion. The PDF export must generate a formatted summary report with the user's name, avatar, total sessions, average stress score, mood trend, and a 7-day stress chart as text-based ASCII or table. All exports must be triggered as in-app browser downloads. Extend `frontend/src/utils/dataExport.ts` with `exportAsCSV` and `exportAsPDF` utility functions.",
+      "id": "feature-add-a-download-my-data-button-inside-the-privacy-data-control-section-when-clicked-present-export-format-options-json-csv-and-pdf-summary-use-the-existing-dataexport-ts-utility-functions-for-generating-the-files-trigger-a-secure-in-app-client-side-download-for-each-format-the-exported-data-must-include-stress-readings-mood-entries-sleep-data-and-profile-information",
+      "title": "Add a 'Download My Data' button inside the Privacy & Data Control section. When clicked, present export format options: JSON, CSV, and PDF summary. Use the existing dataExport.ts utility functions for generating the files. Trigger a secure in-app client-side download for each format. The exported data must include stress readings, mood entries, sleep data, and profile information.",
       "reqIds": [
         "REQ-6"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-gdpr-compliance-ui-layer-1-on-first-login-after-internet-identity-auth-before-profile-setup-display-a-terms-conditions-and-privacy-policy-acceptance-modal-the-modal-must-show-a-scrollable-summary-of-data-practices-a-checkbox-i-accept-the-terms-conditions-and-privacy-policy-and-a-continue-button-that-is-disabled-until-the-checkbox-is-checked-record-termsacceptedat-int-on-the-user-profile-backend-2-add-a-privacy-policy-and-terms-conditions-link-in-the-settings-page-footer-that-opens-a-modal-with-the-full-policy-text-3-in-the-privacy-dashboard-add-a-data-usage-explanation-section-describing-in-plain-language-what-data-is-collected-why-it-is-used-and-how-long-it-is-retained",
-      "title": "Add a GDPR/compliance UI layer: (1) On first login (after Internet Identity auth, before profile setup), display a Terms & Conditions and Privacy Policy acceptance modal. The modal must show a scrollable summary of data practices, a checkbox 'I accept the Terms & Conditions and Privacy Policy', and a 'Continue' button that is disabled until the checkbox is checked. Record `termsAcceptedAt: ?Int` on the user profile backend. (2) Add a 'Privacy Policy' and 'Terms & Conditions' link in the Settings page footer that opens a modal with the full policy text. (3) In the Privacy Dashboard, add a 'Data Usage Explanation' section describing in plain language what data is collected, why it is used, and how long it is retained.",
+      "id": "feature-display-security-information-prominently-within-the-privacy-data-control-section-using-the-existing-securityinfocard-component-the-card-must-list-aes-256-encryption-for-stored-data-encrypted-ble-communication-firebase-security-rules-enforcement-multi-factor-authentication-option-biometric-re-authentication-and-https-secure-backend-present-this-as-reassurance-for-users-with-icons-and-brief-descriptions",
+      "title": "Display security information prominently within the Privacy & Data Control section using the existing SecurityInfoCard component. The card must list: AES-256 encryption for stored data, encrypted BLE communication, Firebase Security Rules enforcement, Multi-factor authentication option, Biometric re-authentication, and HTTPS secure backend. Present this as reassurance for users, with icons and brief descriptions.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-compliance-sub-section-within-privacy-data-control-that-1-displays-a-compliance-summary-stating-adherence-to-gdpr-principles-and-indian-it-data-protection-standards-2-shows-the-user-s-recorded-consent-timestamps-for-privacy-policy-and-terms-conditions-using-the-existing-compliancecard-component-3-provides-links-to-view-the-privacy-policy-and-terms-of-service-via-the-existing-policymodal-component-and-4-includes-a-privacy-first-messaging-statement-explaining-that-the-user-has-full-ownership-and-control-over-their-mental-health-data",
+      "title": "Add a Compliance sub-section within Privacy & Data Control that: (1) displays a compliance summary stating adherence to GDPR principles and Indian IT data protection standards, (2) shows the user's recorded consent timestamps for Privacy Policy and Terms & Conditions using the existing ComplianceCard component, (3) provides links to view the Privacy Policy and Terms of Service via the existing PolicyModal component, and (4) includes a privacy-first messaging statement explaining that the user has full ownership and control over their mental health data.",
       "reqIds": [
         "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-react-query-hooks-in-frontend-src-hooks-usequeries-ts-to-include-mutations-and-queries-for-all-new-backend-functions-userequestaccountdeletion-usecancelaccountdeletion-usedeletestressreading-usedeletemoodentry-useclearanalyticshistory-useadddevicepairing-useremovedevicepairing-usecleardevicepairings-useupdateprivacypreferences-userecordtermsacceptance-each-mutation-must-invalidate-the-relevant-query-cache-keys-on-success-add-a-usegetuserprivacypreferences-query-that-reads-analyticsenabled-aipredictionenabled-devicepairings-pendingdeletion-and-termsacceptedat-from-the-user-profile",
-      "title": "Update the React Query hooks in `frontend/src/hooks/useQueries.ts` to include mutations and queries for all new backend functions: `useRequestAccountDeletion`, `useCancelAccountDeletion`, `useDeleteStressReading`, `useDeleteMoodEntry`, `useClearAnalyticsHistory`, `useAddDevicePairing`, `useRemoveDevicePairing`, `useClearDevicePairings`, `useUpdatePrivacyPreferences`, `useRecordTermsAcceptance`. Each mutation must invalidate the relevant query cache keys on success. Add a `useGetUserPrivacyPreferences` query that reads `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-cohesive-visual-upgrade-to-the-tranquil-app-to-make-it-more-engaging-and-premium-introduce-a-calm-therapeutic-visual-identity-deep-teal-to-indigo-gradient-backgrounds-on-the-dashboard-hero-area-soft-glassmorphism-card-surfaces-frosted-glass-effect-with-backdrop-blur-subtle-ambient-glow-effects-on-the-stress-gauge-and-breathing-circle-smooth-entrance-animations-fade-in-slide-up-on-page-load-and-micro-interaction-hover-press-states-on-all-interactive-elements-update-the-color-palette-in-frontend-src-index-css-and-frontend-tailwind-config-js-to-introduce-richer-jewel-tone-accent-colors-teal-sage-green-soft-gold-while-preserving-the-existing-oklch-variable-structure-all-changes-must-remain-consistent-across-dark-and-light-themes-and-all-breakpoints",
-      "title": "Apply a cohesive visual upgrade to the TRANQUIL app to make it more engaging and premium. Introduce a calm, therapeutic visual identity: deep teal-to-indigo gradient backgrounds on the Dashboard hero area, soft glassmorphism card surfaces (frosted glass effect with backdrop-blur), subtle ambient glow effects on the stress gauge and breathing circle, smooth entrance animations (fade-in + slide-up) on page load, and micro-interaction hover/press states on all interactive elements. Update the color palette in `frontend/src/index.css` and `frontend/tailwind.config.js` to introduce richer jewel-tone accent colors (teal, sage green, soft gold) while preserving the existing OKLCH variable structure. All changes must remain consistent across dark and light themes and all breakpoints.",
-      "reqIds": [
-        "REQ-10"
       ],
       "version": 1
     }
@@ -94,51 +84,27 @@
     },
     {
       "id": "AR-4",
-      "summary": "Full account deletion system: re-auth required, deletes profile/stress logs/mood journal/sleep data/device pairing from Firestore, Firebase Auth, and cloud backups via secure Cloud Function. Warning popup + optional 7-day soft delete grace period.",
+      "summary": "Add Privacy & Data Control section inside Settings with: full account deletion (red button, password re-auth, biometric confirm, 7-day recovery, Firebase Firestore + Auth cleanup, secure Cloud Function, session invalidation, deletion logging), selective deletion of stress logs/mood entries/analytics/device data, and Download My Data button with JSON/CSV/PDF export via secure in-app or encrypted email.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Selective data deletion: delete individual stress logs, mood entries, clear weekly/monthly analytics history, reset device data without deleting account.",
+      "summary": "Implement security requirements: AES-256 encryption for stored data, encrypted BLE communication, Firebase Security Rules, MFA option, biometric re-authentication, and HTTPS secure backend.",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Data Download feature: export user data as JSON, CSV, or PDF summary report, delivered via email or in-app download.",
+      "summary": "Ensure compliance with GDPR principles and Indian IT data protection standards: track user consent, integrate Privacy Policy, track Terms & Conditions acceptance, and apply privacy-first messaging with no dark patterns.",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-7",
-      "summary": "Privacy Dashboard: view stored data summary, data usage explanation, toggle analytics/AI prediction, manage connected devices, and prominent red delete account button.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Security: end-to-end BLE encryption, AES-256 for stored sensitive data, Firebase Security Rules, MFA option, biometric re-auth for sensitive actions.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Compliance: GDPR principles, Indian IT Data Protection standards, Privacy Policy integration, Terms & Conditions acceptance tracking.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Backend deletion Cloud Function: re-authenticate user, delete users/{userId}, stress_logs, mood_logs collections, delete auth record, invalidate tokens, confirm deletion, log event without personal data. Complete within 30 seconds.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Add backend Motoko data model and storage support for: (1) a `pendingDeletion: Bool` and `deletionScheduledAt: ?Int` field on the `UserProfile` type; (2) a `devicePairings: [DevicePairing]` array on the user profile storing `{ deviceId: Text; deviceName: Text; pairedAt: Int }`; (3) privacy preference fields on `UserProfile`: `analyticsEnabled: Bool` and `aiPredictionEnabled: Bool`. Expose the following new actor functions with caller-authorization: `requestAccountDeletion()`, `cancelAccountDeletion()`, `deleteStressReading(id: Nat)`, `deleteMoodEntry(id: Nat)`, `clearAnalyticsHistory()`, `addDevicePairing(deviceId: Text, deviceName: Text)`, `removeDevicePairing(deviceId: Text)`, `clearDevicePairings()`, `updatePrivacyPreferences(analyticsEnabled: Bool, aiPredictionEnabled: Bool)`. All mutation functions must verify `msg.caller` matches the record owner before modifying data.",
+      "id": "AR-13",
+      "summary": "Add backend actor methods to support the full account deletion flow: a deleteAllUserData function that removes all data for the calling user (profile, stress readings, mood entries, sleep entries, breathing sessions, device/vibration history) from all internal Maps in a single call, and a logDeletionEvent function that records a timestamped deletion event without storing any personal data (only a hash or anonymous identifier). Ensure these methods enforce caller-based authorization so only the authenticated user can delete their own data.",
       "reqIds": [
-        "REQ-7"
+        "REQ-9"
       ],
       "status": "pending"
     }

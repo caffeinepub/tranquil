@@ -1,14 +1,16 @@
-import Map "mo:core/Map";
 import List "mo:core/List";
 import Int "mo:core/Int";
-import Text "mo:core/Text";
-import Array "mo:core/Array";
-import Time "mo:core/Time";
-import Order "mo:core/Order";
+import Map "mo:core/Map";
 import Blob "mo:core/Blob";
-import Iter "mo:core/Iter";
-import Runtime "mo:core/Runtime";
+import Text "mo:core/Text";
+import Timer "mo:core/Timer";
+import Array "mo:core/Array";
 import Principal "mo:core/Principal";
+import Runtime "mo:core/Runtime";
+import Iter "mo:core/Iter";
+import Time "mo:core/Time";
+import Nat "mo:core/Nat";
+import Order "mo:core/Order";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
@@ -101,7 +103,31 @@ actor {
     category : Text;
   };
 
+  type ConsentType = {
+    #termsOfService;
+    #privacyPolicy;
+    #dataSharing;
+  };
+
+  type ConsentRecord = {
+    consentType : ConsentType;
+    timestamp : Int;
+  };
+
+  type DeletionSchedule = {
+    deletionTime : Int;
+    isScheduled : Bool;
+  };
+
+  type DeletionEvent = {
+    timestamp : Int;
+    hashedIdentifier : Blob;
+  };
+
   let usersData = Map.empty<Principal, UserData>();
+  let consentRecords = Map.empty<Principal, List.List<ConsentRecord>>();
+  let deletionSchedules = Map.empty<Principal, DeletionSchedule>();
+  let deletionEvents = Map.empty<Principal, List.List<DeletionEvent>>();
 
   module MoodEntry {
     public func compareByTimestamp(a : MoodEntry, b : MoodEntry) : Order.Order {
@@ -465,5 +491,162 @@ actor {
       case (?data) { data };
     };
     userData.stressReadings.toArray().sliceToArray(0, userData.stressReadings.size());
+  };
+
+  public shared ({ caller }) func recordConsent(consentType : ConsentType) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can record consent");
+    };
+    let consentList = switch (consentRecords.get(caller)) {
+      case (null) { List.empty<ConsentRecord>() };
+      case (?list) { list };
+    };
+
+    let newRecord : ConsentRecord = {
+      consentType;
+      timestamp = Time.now();
+    };
+
+    consentList.add(newRecord);
+    consentRecords.add(caller, consentList);
+  };
+
+  public query ({ caller }) func hasConsented(consentType : ConsentType) : async Bool {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can query consent status");
+    };
+    switch (consentRecords.get(caller)) {
+      case (null) { false };
+      case (?records) {
+        let found = records.values().find(func(record) { record.consentType == consentType });
+        switch (found) {
+          case (null) { false };
+          case (_) { true };
+        };
+      };
+    };
+  };
+
+  public query ({ caller }) func getConsents() : async [ConsentRecord] {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can retrieve their consent records");
+    };
+    switch (consentRecords.get(caller)) {
+      case (null) { [] };
+      case (?records) {
+        records.toArray();
+      };
+    };
+  };
+
+  public shared ({ caller }) func deleteStressReading(timestamp : Int) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can delete stress readings");
+    };
+    let userData = getOrCreateUserData(caller);
+    let filteredList = userData.stressReadings.filter(
+      func(reading) {
+        reading.timestamp != timestamp;
+      }
+    );
+    usersData.add(caller, { userData with stressReadings = filteredList });
+  };
+
+  public shared ({ caller }) func deleteMoodEntry(timestamp : Int) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can delete mood entries");
+    };
+    let userData = getOrCreateUserData(caller);
+    let filteredList = userData.moodEntries.filter(
+      func(entry) {
+        entry.timestamp != timestamp;
+      }
+    );
+    usersData.add(caller, { userData with moodEntries = filteredList });
+  };
+
+  public shared ({ caller }) func clearAnalyticsHistory() : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can clear analytics history");
+    };
+    let userData = getOrCreateUserData(caller);
+    let clearedUserData = {
+      userData with
+      stressReadings = List.empty<StressReading>();
+      moodEntries = List.empty<MoodEntry>();
+      sleepEntries = List.empty<SleepEntry>();
+      breathingSessions = List.empty<BreathingSession>();
+    };
+    usersData.add(caller, clearedUserData);
+  };
+
+  public shared ({ caller }) func resetDevicePairing() : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can reset device pairing");
+    };
+    let userData = getOrCreateUserData(caller);
+    let clearedUserData = {
+      userData with
+      vibrationCommands = List.empty<VibrationCommand>();
+    };
+    usersData.add(caller, clearedUserData);
+  };
+
+  public shared ({ caller }) func deleteAccount(withRecoveryPeriod : Bool) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can delete accounts");
+    };
+
+    if (withRecoveryPeriod) {
+      let schedule : DeletionSchedule = {
+        deletionTime = Time.now() + 7 * 24 * 60 * 60 * 1_000_000_000;
+        isScheduled = true;
+      };
+      deletionSchedules.add(caller, schedule);
+      ignore Timer.setTimer<system>(
+        #seconds 604800,
+        func() : async () {
+          performImmediateDeletion(caller);
+        },
+      );
+    } else {
+      performImmediateDeletion(caller);
+    };
+  };
+
+  public shared ({ caller }) func deleteAllUserData() : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can delete their data");
+    };
+    performImmediateDeletion(caller);
+  };
+
+  public shared ({ caller }) func logDeletionEvent(hashedIdentifier : Blob) : async () {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can log deletion events");
+    };
+    let event : DeletionEvent = {
+      timestamp = Time.now();
+      hashedIdentifier;
+    };
+    let eventList = switch (deletionEvents.get(caller)) {
+      case (null) { List.empty<DeletionEvent>() };
+      case (?list) { list };
+    };
+    eventList.add(event);
+    deletionEvents.add(caller, eventList);
+  };
+
+  private func performImmediateDeletion(caller : Principal) {
+    usersData.remove(caller);
+    consentRecords.remove(caller);
+    deletionSchedules.remove(caller);
+  };
+
+  public query ({ caller }) func getDeletionStatus() : async ?DeletionSchedule {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only users can get deletion status");
+    };
+    deletionSchedules.get(caller);
   };
 };

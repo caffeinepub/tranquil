@@ -1,102 +1,48 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T14:12:14.410Z",
-  "summary": "The diff implements substantial portions of the requested features (REQ-3 through REQ-10), including the Privacy Dashboard page, DeleteAccountModal, TermsAcceptanceModal, PolicyModal, data export utilities, and visual upgrades. However, several critical requirements are either missing or only partially implemented, most notably the backend Motoko changes (REQ-7) which appear entirely absent from the diff, and several frontend gaps.",
+  "generatedAt": "2026-03-01T06:09:30.193Z",
+  "summary": "The diff implements most of the required Privacy & Data Control features including the Settings page section, DeleteAccountModal with multi-step flow, SelectiveDataDeletionCard, DataExportCard, SecurityInfoCard, ComplianceCard, PolicyModal, and backend deleteAllUserData/logDeletionEvent methods. However, there are a few gaps and one notable deviation worth flagging.",
   "missing_requirements": [
     {
-      "id": "REQ-7",
-      "requirement": "Add backend Motoko data model with pendingDeletion, deletionScheduledAt, analyticsEnabled, aiPredictionEnabled, devicePairings, termsAcceptedAt fields on UserProfile; expose all new actor functions with caller-authorization.",
-      "reason": "No changes to backend/main.mo are present in the diff. The file is not listed as added or modified, so none of the required Motoko data model changes or actor functions are implemented.",
-      "evidence": []
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "Each mood journal entry in the Journal page must have a delete icon button with inline 'Are you sure?' confirmation pattern calling backend deleteMoodEntry.",
-      "reason": "The diff modifies Analytics.tsx with delete buttons for stress readings but there is no evidence of changes to the Journal page (frontend/src/pages/Journal.tsx) adding delete icons to mood entries.",
+      "requirement": "REQ-7 requires the SecurityInfoCard to explicitly list 'Firebase Security Rules enforcement' as one of the six named security features.",
+      "reason": "The SecurityInfoCard.tsx diff shows the third feature is labeled 'Security Rules Enforcement' rather than 'Firebase Security Rules enforcement'. The requirement and AC explicitly state 'Firebase Security Rules' must be listed by name.",
       "evidence": [
-        "frontend/src/pages/Analytics.tsx"
+        "frontend/src/components/SecurityInfoCard.tsx"
       ]
     },
     {
-      "id": "REQ-5",
-      "requirement": "The Analytics page delete icon for stress readings must actually call the backend deleteStressReading(id) function.",
-      "reason": "In Analytics.tsx, the handleDeleteReading function only performs optimistic UI removal (setLocalReadings) without calling any backend actor method or mutation hook. The actual backend call is missing.",
+      "requirement": "REQ-6 states export functions must be sourced from the existing dataExport.ts utility file.",
+      "reason": "DataExportCard.tsx defines its own inline export functions (exportAsJSON, exportAsCSV, exportAsPDF, triggerDownload) rather than importing from the existing dataExport.ts utility. The AC explicitly states 'Export functions are sourced from the existing dataExport.ts utility.'",
       "evidence": [
-        "frontend/src/pages/Analytics.tsx"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "requirement": "Accepting the T&C must call a backend function that records termsAcceptedAt timestamp on the user profile, not just localStorage.",
-      "reason": "In App.tsx, terms acceptance is checked via localStorage rather than the backend. Since backend/main.mo has no recordTermsAcceptance function, this cannot actually persist to the backend user profile.",
-      "evidence": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/TermsAcceptanceModal.tsx"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "requirement": "Users who have already accepted T&C must not be shown the modal again based on backend termsAcceptedAt, not just localStorage.",
-      "reason": "App.tsx checks localStorage for 'tranquil_terms_accepted' to determine if terms were already accepted. This would not survive clearing browser storage and is not driven by the backend profile field.",
-      "evidence": [
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "The Privacy Dashboard 'Manage Connected Devices' section must list stored pairing records with individual 'Remove Device' buttons that call the backend removeDevicePairing function.",
-      "reason": "Privacy.tsx uses useGetUserPrivacyPreferences to get devicePairings and calls useClearDevicePairings for bulk reset, but there is no evidence of individual per-device remove buttons calling useRemoveDevicePairing in the truncated Privacy.tsx content.",
-      "evidence": [
-        "frontend/src/pages/Privacy.tsx"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "The backend requestAccountDeletion function must set pendingDeletion=true and deletionScheduledAt timestamp on the user record.",
-      "reason": "No changes to backend/main.mo are present in the diff, so the backend requestAccountDeletion function does not exist.",
-      "evidence": []
-    },
-    {
-      "id": "REQ-10",
-      "requirement": "Card components must use a frosted-glass/glassmorphism surface style with backdrop-blur, and stress gauge and breathing circle must have a soft ambient glow effect.",
-      "reason": "While index.css and tailwind.config.js add glow shadow utilities, there is no evidence of changes to Dashboard, Breathe, or stress gauge/breathing circle components applying these styles.",
-      "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
+        "frontend/src/components/DataExportCard.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "The CSV export includes a 'stressLevel' column in addition to the specified 5 columns (date, stressScore, heartRate, skinTemp, motion), producing a 6-column output.",
-      "reason": "REQ-6 specifies exactly 5 columns. The implemented exportAsCSV adds a 'stressLevel' column not in the spec.",
+      "description": "A separate standalone Privacy page (Privacy.tsx) with its own privacy preferences toggles, data count summaries, analytics/AI toggle controls, and device clearing actions was implemented as a full page route (/privacy).",
+      "reason": "The build request only asks for a Privacy & Data Control section inside the Settings page. A separate Privacy page/route was not requested and adds UI surface not specified in any requirement.",
       "evidence": [
-        "frontend/src/utils/dataExport.ts"
-      ]
-    },
-    {
-      "description": "Terms acceptance is persisted to localStorage ('tranquil_terms_accepted') as the primary gate for showing the T&C modal, introducing a client-side persistence layer not mentioned in the requirements.",
-      "reason": "The build request specifies recording termsAcceptedAt on the backend user profile. Using localStorage as the primary gate was not requested.",
-      "evidence": [
+        "frontend/src/pages/Privacy.tsx",
         "frontend/src/App.tsx"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.82,
   "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
+    "frontend/src/components/ComplianceCard.tsx",
+    "frontend/src/components/DataExportCard.tsx",
     "frontend/src/components/DeleteAccountModal.tsx",
     "frontend/src/components/PolicyModal.tsx",
-    "frontend/src/components/TermsAcceptanceModal.tsx",
+    "frontend/src/components/SecurityInfoCard.tsx",
+    "frontend/src/components/SelectiveDataDeletionCard.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/pages/Analytics.tsx",
     "frontend/src/pages/Privacy.tsx",
-    "frontend/src/pages/Profile.tsx",
     "frontend/src/pages/Settings.tsx",
-    "frontend/src/utils/dataExport.ts",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }

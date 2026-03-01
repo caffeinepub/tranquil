@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { useGetUserPrivacyPreferences, useUpdatePrivacyPreferences, useClearAnalyticsHistory, useClearDevicePairings } from '../hooks/useQueries';
-import { useGetUserData } from '../hooks/useQueries';
-import { DeleteAccountModal } from '../components/DeleteAccountModal';
+import {
+  useGetUserPrivacyPreferences,
+  useUpdatePrivacyPreferences,
+  useClearAnalyticsHistory,
+  useClearDevicePairings,
+  useGetUserData,
+} from '../hooks/useQueries';
+import DeleteAccountModal, { DeleteAccountModal as DeleteAccountModalNamed } from '../components/DeleteAccountModal';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +30,6 @@ import {
   Brain,
   Smartphone,
   Database,
-  Download,
   Eye,
   Lock,
   AlertTriangle,
@@ -97,7 +100,8 @@ export function Privacy() {
   return (
     <div className="px-4 py-5 space-y-6 animate-fade-in-up">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-3xl p-6"
+      <div
+        className="relative overflow-hidden rounded-3xl p-6"
         style={{
           background: 'linear-gradient(135deg, oklch(0.68 0.14 185), oklch(0.52 0.18 265))',
         }}
@@ -130,14 +134,14 @@ export function Privacy() {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Stress Readings', count: dataCounts.stressReadings, icon: '📊', color: 'bg-red-400/10 text-red-500' },
-              { label: 'Mood Entries', count: dataCounts.moodEntries, icon: '😊', color: 'bg-purple-400/10 text-purple-500' },
-              { label: 'Sleep Records', count: dataCounts.sleepEntries, icon: '😴', color: 'bg-blue-400/10 text-blue-500' },
-              { label: 'Breathing Sessions', count: dataCounts.breathingSessions, icon: '🌬️', color: 'bg-teal-400/10 text-teal-500' },
-              { label: 'Paired Devices', count: dataCounts.devicePairings, icon: '📱', color: 'bg-amber-400/10 text-amber-500' },
+              { label: 'Stress Readings', count: dataCounts.stressReadings, icon: '📊', color: 'bg-red-400/10' },
+              { label: 'Mood Entries', count: dataCounts.moodEntries, icon: '😊', color: 'bg-purple-400/10' },
+              { label: 'Sleep Records', count: dataCounts.sleepEntries, icon: '😴', color: 'bg-blue-400/10' },
+              { label: 'Breathing Sessions', count: dataCounts.breathingSessions, icon: '🌬️', color: 'bg-teal-400/10' },
+              { label: 'Paired Devices', count: dataCounts.devicePairings, icon: '📱', color: 'bg-amber-400/10' },
             ].map(item => (
               <div key={item.label} className="p-4 bg-card rounded-2xl border border-border">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base mb-2 ${item.color.split(' ')[0]}`}>
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-base mb-2 ${item.color}`}>
                   {item.icon}
                 </div>
                 <p className="text-2xl font-bold font-display text-foreground">{item.count}</p>
@@ -219,7 +223,11 @@ export function Privacy() {
                     <Smartphone size={14} className="text-muted-foreground" />
                     <span className="text-sm text-foreground font-mono">{device}</span>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg h-7 px-2 text-xs">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg h-7 px-2 text-xs"
+                  >
                     Remove
                   </Button>
                 </div>

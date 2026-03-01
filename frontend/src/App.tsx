@@ -1,6 +1,6 @@
 import React from 'react';
-import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { createRouter, createRoute, createRootRoute, RouterProvider } from '@tanstack/react-router';
+import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from './hooks/useQueries';
@@ -14,7 +14,7 @@ import { Sounds } from './pages/Sounds';
 import { Journal } from './pages/Journal';
 import { Analytics } from './pages/Analytics';
 import { Profile } from './pages/Profile';
-import { Settings } from './pages/Settings';
+import Settings from './pages/Settings';
 import { TipsAndReminders } from './pages/TipsAndReminders';
 import { SleepTracking } from './pages/SleepTracking';
 import { VibrationControl } from './pages/VibrationControl';
@@ -28,7 +28,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = !!identity;
 
-  // Check if terms have been accepted (stored in localStorage until backend supports it)
+  // Check if terms have been accepted (stored in localStorage)
   const termsAccepted = !!localStorage.getItem('tranquil_terms_accepted');
 
   if (isInitializing) {
@@ -57,7 +57,6 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
         <TermsAcceptanceModal
           open={true}
           onAccepted={() => {
-            // localStorage is already set in the mutation; force re-render
             window.dispatchEvent(new Event('storage'));
           }}
         />
@@ -170,7 +169,7 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <RouterProvider router={router} />
       <Toaster position="top-center" richColors />
     </ThemeProvider>

@@ -15,6 +15,17 @@ export interface BreathingSession {
   'durationSeconds' : bigint,
   'timestamp' : bigint,
 }
+export interface ConsentRecord {
+  'timestamp' : bigint,
+  'consentType' : ConsentType,
+}
+export type ConsentType = { 'privacyPolicy' : null } |
+  { 'dataSharing' : null } |
+  { 'termsOfService' : null };
+export interface DeletionSchedule {
+  'deletionTime' : bigint,
+  'isScheduled' : boolean,
+}
 export interface MoodEntry {
   'mood' : string,
   'note' : [] | [string],
@@ -109,9 +120,16 @@ export interface _SERVICE {
   >,
   'addVibrationCommand' : ActorMethod<[string, bigint], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'clearAnalyticsHistory' : ActorMethod<[], undefined>,
+  'deleteAccount' : ActorMethod<[boolean], undefined>,
+  'deleteAllUserData' : ActorMethod<[], undefined>,
+  'deleteMoodEntry' : ActorMethod<[bigint], undefined>,
+  'deleteStressReading' : ActorMethod<[bigint], undefined>,
   'getBreathingSessions' : ActorMethod<[], Array<BreathingSession>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getConsents' : ActorMethod<[], Array<ConsentRecord>>,
+  'getDeletionStatus' : ActorMethod<[], [] | [DeletionSchedule]>,
   'getLatestStressReading' : ActorMethod<[], [] | [StressReading]>,
   'getMoodEntriesThisWeek' : ActorMethod<[], Array<MoodEntry>>,
   'getReadingsWithTip' : ActorMethod<[string], Array<StressReading>>,
@@ -122,7 +140,11 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getVibrationCommands' : ActorMethod<[], Array<VibrationCommand>>,
   'getWeeklyStressAnalytics' : ActorMethod<[], Array<StressReading>>,
+  'hasConsented' : ActorMethod<[ConsentType], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'logDeletionEvent' : ActorMethod<[Uint8Array], undefined>,
+  'recordConsent' : ActorMethod<[ConsentType], undefined>,
+  'resetDevicePairing' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'updateReminderPrefs' : ActorMethod<
     [boolean, boolean, boolean, bigint],

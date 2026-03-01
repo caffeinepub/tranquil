@@ -1,151 +1,124 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-27T14:12:14.414Z",
+  "generatedAt": "2026-03-01T06:09:30.198Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 8,
-    "implemented": 7,
+    "total": 7,
+    "implemented": 6,
     "items": [
       {
-        "id": "REQ-10",
-        "summary": "Apply a cohesive visual upgrade to the TRANQUIL app to make it more engaging and premium. Introduce a calm, therapeutic visual identity: deep teal-to-indigo gradient backgrounds on the Dashboard hero area, soft glassmorphism card surfaces (frosted glass effect with backdrop-blur), subtle ambient glow effects on the stress gauge and breathing circle, smooth entrance animations (fade-in + slide-up) on page load, and micro-interaction hover/press states on all interactive elements. Update the color palette in `frontend/src/index.css` and `frontend/tailwind.config.js` to introduce richer jewel-tone accent colors (teal, sage green, soft gold) while preserving the existing OKLCH variable structure. All changes must remain consistent across dark and light themes and all breakpoints.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/pages/Dashboard.tsx",
-          "frontend/src/components/StressGauge.tsx",
-          "frontend/src/components/BreathingCircle.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/components/ui/button.tsx",
-          "frontend/src/components/ui/card.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
         "id": "REQ-3",
-        "summary": "Implement a Privacy Dashboard page (route: /privacy) accessible from the Settings page and the Profile page. The dashboard must display: a stored data summary (counts of stress logs, mood entries, sleep entries, breathing sessions, device pairing records); a plain-language data usage explanation section; toggles for analytics tracking and AI prediction usage (persisted to the backend user profile); a 'Manage Connected Devices' section listing paired devices with individual remove buttons; and a prominently styled red 'Delete Account' button at the bottom. The page must follow the TRANQUIL design system (OKLCH palette, Nunito/Quicksand fonts, dark/light theme support) and be fully responsive from 320 px mobile through desktop.",
+        "summary": "Add a 'Privacy & Data Control' section inside the Settings page. This section must contain clearly labeled sub-sections for Full Account Deletion, Selective Data Deletion, and Download My Data. Use a calm blue/teal theme consistent with the existing design tokens, clear plain-English labels, and no dark patterns.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Privacy.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/Settings.tsx",
-          "frontend/src/pages/Profile.tsx"
+          "frontend/src/pages/Settings.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Privacy.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/pages/Settings.tsx",
-          "frontend/src/pages/Profile.tsx"
+          "frontend/src/pages/Settings.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Implement a full account deletion flow. In the Privacy Dashboard, when the user clicks 'Delete My Account', display a modal warning with the exact text 'This action is permanent and cannot be undone.' and a secondary message explaining that all data (profile, stress logs, mood journal, sleep data, device pairing history) will be deleted. Require the user to type 'DELETE' to confirm. On confirmation, call a backend function that marks the account for deletion (soft-delete flag with a 30-day grace period timestamp). Immediately clear all locally cached data and log the user out. Display a toast confirming deletion initiation. The entire UI flow must complete within 30 seconds. Add a corresponding backend Motoko function `requestAccountDeletion(userId)` that sets a `pendingDeletion` flag and `deletionScheduledAt` timestamp on the user record.",
+        "summary": "Implement a Full Account Deletion flow inside the Privacy & Data Control section. Show a red 'Delete Account' button. On click, open the existing DeleteAccountModal (or enhance it) to: (1) require password re-authentication, (2) support biometric confirmation via the existing useBiometricAuth hook, (3) display the warning 'This action is permanent and cannot be undone.', (4) offer an optional 7-day recovery period toggle before confirming. On confirmation, delete all user data from the backend (profile, stress logs, mood logs, sleep data, device history) by calling the appropriate backend actor methods, log a deletion event without personal data, and invalidate all active React Query sessions.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/DeleteAccountModal.tsx",
-          "frontend/src/pages/Privacy.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Settings.tsx"
         ],
         "matchedFiles": [
           "frontend/src/components/DeleteAccountModal.tsx",
-          "frontend/src/pages/Privacy.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Settings.tsx"
         ]
       },
       {
         "id": "REQ-5",
-        "summary": "Implement selective data deletion controls. In the Privacy Dashboard, add a 'Manage My Data' section with the following individual deletion actions: (1) Delete a specific stress log entry — each stress log in the existing list views must have a delete icon that calls the backend `deleteStressReading(id)` function; (2) Delete a specific mood journal entry — each mood entry in the Journal page must have a delete icon that calls the backend `deleteMoodEntry(id)` function; (3) Clear all analytics history (weekly/monthly) — a 'Clear Analytics History' button that calls a backend function `clearAnalyticsHistory()` deleting all stress readings for the user; (4) Reset device pairing data without deleting the account — a 'Reset Device Data' button that calls `clearDevicePairings()` on the backend. All destructive actions must show a brief inline confirmation ('Are you sure?') before executing. Backend must implement or expose these deletion functions in the main Motoko actor.",
+        "summary": "Implement Selective Data Deletion inside the Privacy & Data Control section using the existing SelectiveDataDeletionCard component (or an enhanced version). Users must be able to independently delete: individual stress log entries, individual mood entries, all analytics history, and device pairing data. Each action must show a confirmation dialog before executing and display a toast notification on success or failure.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/Analytics.tsx",
-          "frontend/src/pages/Journal.tsx",
-          "frontend/src/pages/Privacy.tsx"
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/SelectiveDataDeletionCard.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
-          "frontend/src/pages/Analytics.tsx",
-          "frontend/src/pages/Privacy.tsx"
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/SelectiveDataDeletionCard.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
         "id": "REQ-6",
-        "summary": "Enhance the existing data export feature in Settings to support three export formats: JSON (already partially implemented in `frontend/src/utils/dataExport.ts`), CSV, and a structured PDF summary report. Add a format selector (radio group or segmented control: JSON / CSV / PDF) before the download button. The JSON export must include all user data (profile, stress readings, mood entries, sleep entries, breathing sessions). The CSV export must produce a flat spreadsheet of stress readings with columns: date, stressScore, heartRate, skinTemp, motion. The PDF export must generate a formatted summary report with the user's name, avatar, total sessions, average stress score, mood trend, and a 7-day stress chart as text-based ASCII or table. All exports must be triggered as in-app browser downloads. Extend `frontend/src/utils/dataExport.ts` with `exportAsCSV` and `exportAsPDF` utility functions.",
+        "summary": "Add a 'Download My Data' button inside the Privacy & Data Control section. When clicked, present export format options: JSON, CSV, and PDF summary. Use the existing dataExport.ts utility functions for generating the files. Trigger a secure in-app client-side download for each format. The exported data must include stress readings, mood entries, sleep data, and profile information.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/utils/dataExport.ts",
-          "frontend/src/pages/Settings.tsx"
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/DataExportCard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/utils/dataExport.ts",
-          "frontend/src/pages/Settings.tsx"
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/DataExportCard.tsx"
         ]
       },
       {
         "id": "REQ-7",
-        "summary": "Add backend Motoko data model and storage support for: (1) a `pendingDeletion: Bool` and `deletionScheduledAt: ?Int` field on the `UserProfile` type; (2) a `devicePairings: [DevicePairing]` array on the user profile storing `{ deviceId: Text; deviceName: Text; pairedAt: Int }`; (3) privacy preference fields on `UserProfile`: `analyticsEnabled: Bool` and `aiPredictionEnabled: Bool`. Expose the following new actor functions with caller-authorization: `requestAccountDeletion()`, `cancelAccountDeletion()`, `deleteStressReading(id: Nat)`, `deleteMoodEntry(id: Nat)`, `clearAnalyticsHistory()`, `addDevicePairing(deviceId: Text, deviceName: Text)`, `removeDevicePairing(deviceId: Text)`, `clearDevicePairings()`, `updatePrivacyPreferences(analyticsEnabled: Bool, aiPredictionEnabled: Bool)`. All mutation functions must verify `msg.caller` matches the record owner before modifying data.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Display security information prominently within the Privacy & Data Control section using the existing SecurityInfoCard component. The card must list: AES-256 encryption for stored data, encrypted BLE communication, Firebase Security Rules enforcement, Multi-factor authentication option, Biometric re-authentication, and HTTPS secure backend. Present this as reassurance for users, with icons and brief descriptions.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/SecurityInfoCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/Settings.tsx",
+          "frontend/src/components/SecurityInfoCard.tsx"
+        ]
       },
       {
         "id": "REQ-8",
-        "summary": "Add a GDPR/compliance UI layer: (1) On first login (after Internet Identity auth, before profile setup), display a Terms & Conditions and Privacy Policy acceptance modal. The modal must show a scrollable summary of data practices, a checkbox 'I accept the Terms & Conditions and Privacy Policy', and a 'Continue' button that is disabled until the checkbox is checked. Record `termsAcceptedAt: ?Int` on the user profile backend. (2) Add a 'Privacy Policy' and 'Terms & Conditions' link in the Settings page footer that opens a modal with the full policy text. (3) In the Privacy Dashboard, add a 'Data Usage Explanation' section describing in plain language what data is collected, why it is used, and how long it is retained.",
+        "summary": "Add a Compliance sub-section within Privacy & Data Control that: (1) displays a compliance summary stating adherence to GDPR principles and Indian IT data protection standards, (2) shows the user's recorded consent timestamps for Privacy Policy and Terms & Conditions using the existing ComplianceCard component, (3) provides links to view the Privacy Policy and Terms of Service via the existing PolicyModal component, and (4) includes a privacy-first messaging statement explaining that the user has full ownership and control over their mental health data.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/TermsAcceptanceModal.tsx",
-          "frontend/src/components/PolicyModal.tsx",
-          "frontend/src/App.tsx",
           "frontend/src/pages/Settings.tsx",
-          "frontend/src/pages/Privacy.tsx"
+          "frontend/src/components/ComplianceCard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/TermsAcceptanceModal.tsx",
-          "frontend/src/components/PolicyModal.tsx",
-          "frontend/src/App.tsx",
           "frontend/src/pages/Settings.tsx",
-          "frontend/src/pages/Privacy.tsx"
+          "frontend/src/components/ComplianceCard.tsx"
         ]
       },
       {
         "id": "REQ-9",
-        "summary": "Update the React Query hooks in `frontend/src/hooks/useQueries.ts` to include mutations and queries for all new backend functions: `useRequestAccountDeletion`, `useCancelAccountDeletion`, `useDeleteStressReading`, `useDeleteMoodEntry`, `useClearAnalyticsHistory`, `useAddDevicePairing`, `useRemoveDevicePairing`, `useClearDevicePairings`, `useUpdatePrivacyPreferences`, `useRecordTermsAcceptance`. Each mutation must invalidate the relevant query cache keys on success. Add a `useGetUserPrivacyPreferences` query that reads `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
-        ]
+        "summary": "Add backend actor methods to support the full account deletion flow: a deleteAllUserData function that removes all data for the calling user (profile, stress readings, mood entries, sleep entries, breathing sessions, device/vibration history) from all internal Maps in a single call, and a logDeletionEvent function that records a timestamped deletion event without storing any personal data (only a hash or anonymous identifier). Ensure these methods enforce caller-based authorization so only the authenticated user can delete their own data.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
-    "build-template/README.md",
-    "caffeine.lock.json",
     "feature_evidence.json",
+    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/public/assets/generated/privacy-dashboard-bg.dim_1200x800.png",
-    "frontend/public/assets/generated/tranquil-logo-mark.dim_256x256.png",
     "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/ComplianceCard.tsx",
+    "frontend/src/components/DataExportCard.tsx",
     "frontend/src/components/DeleteAccountModal.tsx",
     "frontend/src/components/PolicyModal.tsx",
-    "frontend/src/components/TermsAcceptanceModal.tsx",
+    "frontend/src/components/SecurityInfoCard.tsx",
+    "frontend/src/components/SelectiveDataDeletionCard.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/pages/Analytics.tsx",
     "frontend/src/pages/Privacy.tsx",
-    "frontend/src/pages/Profile.tsx",
     "frontend/src/pages/Settings.tsx",
-    "frontend/src/utils/dataExport.ts",
-    "frontend/tailwind.config.js",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

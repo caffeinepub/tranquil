@@ -1,231 +1,154 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "TRANQUIL – Privacy Dashboard, Data Ownership Controls & Secure Deletion",
+  "title": "Privacy & Data Control Section in Settings (Full Account Deletion, Selective Deletion, Data Download, Security & Compliance)",
   "requirements": [
     {
       "id": "REQ-3",
-      "summary": "Implement Privacy Dashboard page with data summary, privacy toggles, device management, and account deletion button",
+      "summary": "Add 'Privacy & Data Control' section to Settings page with clearly labeled sub-sections for Full Account Deletion, Selective Data Deletion, and Download My Data using calm blue/teal theme.",
       "acceptanceCriteria": [
-        "A /privacy route is accessible from Settings and Profile pages.",
-        "Data summary cards show real counts fetched from the backend for stress logs, mood entries, sleep entries, breathing sessions, and paired devices.",
-        "Analytics tracking toggle and AI prediction toggle are rendered as Switch components and their state is persisted to the backend user profile.",
-        "Connected devices section lists stored pairing records; each entry has a 'Remove Device' button that deletes that record from the backend.",
-        "Delete Account button is styled with a red background and the label 'Delete My Account'.",
-        "Page is fully responsive at 320 px, 768 px, and 1024 px+ viewports.",
-        "Dark and light themes render correctly with no visual discrepancies."
+        "Settings page contains a clearly delineated 'Privacy & Data Control' section.",
+        "Section is visually consistent with the existing blue/teal design token system.",
+        "All labels use plain, friendly English with no manipulative or misleading patterns.",
+        "Section is accessible and renders correctly on mobile (320px+), tablet (768px+), and desktop (1024px+)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/Privacy.tsx",
-          "operation": "create",
-          "description": "Create the Privacy Dashboard page component that fetches user data counts, displays data summary cards (stress logs, mood entries, sleep entries, breathing sessions, device pairings), renders analytics and AI prediction toggles using the Switch component, displays a Manage Connected Devices section with individual device removal buttons, and includes a prominently styled red 'Delete My Account' button at the bottom. Use the useGetUserPrivacyPreferences query hook to fetch privacy settings and device pairings. Use the useUpdatePrivacyPreferences mutation for toggle changes and useRemoveDevicePairing mutation for device removal. Apply TRANQUIL design system styling (OKLCH palette, Nunito/Quicksand fonts, dark/light theme support). Ensure full responsiveness from 320px mobile through desktop breakpoints. Include a plain-language 'Data Usage Explanation' section describing what data is collected, why it is used, and retention periods."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register the /privacy route in the TanStack Router configuration, mapping it to the Privacy page component. Ensure the route is protected by the existing AuthGuard so only authenticated users can access it."
-        },
-        {
           "path": "frontend/src/pages/Settings.tsx",
           "operation": "modify",
-          "description": "Add a navigation link/button to the Privacy Dashboard (/privacy) in the Settings page. Place it prominently in the main settings menu, labeled 'Privacy & Data Control' or similar."
-        },
-        {
-          "path": "frontend/src/pages/Profile.tsx",
-          "operation": "modify",
-          "description": "Add a navigation link/button to the Privacy Dashboard (/privacy) in the Profile page. Place it near the existing action buttons (e.g., near logout), labeled 'Privacy Dashboard' or 'Manage My Data'."
+          "description": "Add a new 'Privacy & Data Control' section to the Settings page. Insert this section after the existing reminder preferences section and before the footer links. Use a visually distinct card or container with a heading 'Privacy & Data Control' that follows the existing blue/teal design tokens from the theme system. The section should contain placeholders or wrappers for the sub-sections: Full Account Deletion, Selective Data Deletion, Download My Data, Security Information, and Compliance. Ensure responsive layout using Tailwind grid or flex utilities that work on mobile (320px+), tablet (768px+), and desktop (1024px+). All text labels should be plain, friendly English without dark patterns."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Implement full account deletion flow with confirmation modal, backend soft-delete call, and logout",
+      "summary": "Implement Full Account Deletion flow with password/biometric re-authentication, warning message, optional 7-day recovery period toggle, backend data deletion via deleteAllUserData and logDeletionEvent, and React Query cache invalidation.",
       "acceptanceCriteria": [
-        "Clicking 'Delete My Account' opens a confirmation modal with the exact warning text.",
-        "The confirm button remains disabled until the user types 'DELETE' in the input field.",
-        "On confirmation, the backend `requestAccountDeletion` function is called and returns success.",
-        "The backend marks the user record with `pendingDeletion = true` and records `deletionScheduledAt` timestamp.",
-        "After confirmation, all React Query caches are cleared and the user is logged out via Internet Identity.",
-        "A success toast 'Your account deletion has been scheduled. You have 30 days to cancel.' is shown before logout.",
-        "The entire flow from button click to logout completes within 30 seconds."
+        "Red 'Delete Account' button is visible in the Privacy & Data Control section.",
+        "Clicking the button opens a multi-step confirmation modal.",
+        "Modal requires either password re-authentication or biometric confirmation before proceeding.",
+        "Warning text 'This action is permanent and cannot be undone.' is prominently displayed.",
+        "A toggle for optional 7-day recovery period is shown before final confirmation.",
+        "On confirmation, all user data (profile, stress logs, mood logs, sleep data, device history) is deleted from the backend actor.",
+        "A deletion event is logged without any personally identifiable data.",
+        "All active React Query caches are invalidated after deletion.",
+        "The entire deletion flow completes within 30 seconds."
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/DeleteAccountModal.tsx",
-          "operation": "create",
-          "description": "Create a confirmation modal component for account deletion. Display the exact warning text 'This action is permanent and cannot be undone.' and a secondary message explaining that all data (profile, stress logs, mood journal, sleep data, device pairing history) will be deleted. Include a text input field requiring the user to type 'DELETE' to enable the confirm button. Use the Dialog component from shadcn/ui. On confirmation, call the useRequestAccountDeletion mutation hook, clear all React Query caches using queryClient.clear(), show a success toast with the message 'Your account deletion has been scheduled. You have 30 days to cancel.', and trigger logout via the useInternetIdentity hook's clear() method. Style the confirm button with red/destructive styling. Ensure the entire flow is non-blocking and completes quickly."
+          "operation": "modify",
+          "description": "Enhance the existing DeleteAccountModal component to support the full account deletion flow. Add a multi-step wizard structure: (1) password or biometric re-authentication using the existing useBiometricAuth hook, (2) display the warning 'This action is permanent and cannot be undone.' prominently in bold red text, (3) add a toggle UI for an optional 7-day recovery period before final confirmation, (4) on final confirmation, call the backend deleteAllUserData() method followed by logDeletionEvent() with a hashed identifier (use a SHA-256 hash of the principal string as the anonymous identifier). After successful deletion, invalidate all React Query caches using queryClient.clear() and redirect to the logout flow. Ensure the modal enforces that the user must complete biometric or password verification before seeing the deletion options. The modal should display loading states and handle errors gracefully with toast notifications. Verify the useBiometricAuth hook's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/pages/Privacy.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Wire the Delete Account button to open the DeleteAccountModal component when clicked. Import and render the DeleteAccountModal, managing its open/close state with local React state."
+          "description": "Add two new mutation hooks: useDeleteAllUserData() that wraps the backend deleteAllUserData() method, and useLogDeletionEvent(hashedIdentifier: Uint8Array) that wraps the backend logDeletionEvent() method. Both should use useMutation from React Query and handle success/error states. On successful deletion, these hooks should invalidate all relevant query keys or trigger a full queryClient.clear(). Export these hooks for use in the DeleteAccountModal component."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Within the newly added 'Privacy & Data Control' section, add a red 'Delete Account' button with prominent destructive styling (red background, white text). When clicked, this button should open the enhanced DeleteAccountModal component. Position this button at the bottom of the Privacy & Data Control section with clear spacing and a warning icon. Ensure the button is accessible and follows the WCAG contrast guidelines."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Implement selective data deletion controls for individual entries and bulk data clearing",
+      "summary": "Implement Selective Data Deletion using the existing SelectiveDataDeletionCard component to allow independent deletion of stress log entries, mood entries, analytics history, and device pairing data with confirmation dialogs and toast notifications.",
       "acceptanceCriteria": [
-        "Each stress log entry in the Analytics page and any log list renders a delete icon button.",
-        "Clicking a stress log delete icon shows an inline 'Are you sure?' prompt; confirming calls the backend and removes the entry from the UI.",
-        "Each mood journal entry in the Journal page renders a delete icon button with the same inline confirmation pattern.",
-        "Privacy Dashboard 'Clear Analytics History' button triggers a backend call that removes all stress readings for the user; UI reflects the cleared state.",
-        "Privacy Dashboard 'Reset Device Data' button triggers a backend call that removes all device pairing records; the Manage Connected Devices list becomes empty.",
-        "All four backend functions (`deleteStressReading`, `deleteMoodEntry`, `clearAnalyticsHistory`, `clearDevicePairings`) exist in `backend/main.mo` with proper authorization checks."
+        "Selective Data Deletion sub-section is visible inside Privacy & Data Control.",
+        "Users can delete individual stress log entries with a confirmation dialog.",
+        "Users can delete individual mood entries with a confirmation dialog.",
+        "Users can clear all analytics history with a confirmation dialog.",
+        "Users can reset/remove device pairing data with a confirmation dialog.",
+        "Toast notification is shown on successful deletion or on error.",
+        "Backend data is actually removed upon confirmed deletion."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/Analytics.tsx",
+          "path": "frontend/src/pages/Settings.tsx",
           "operation": "modify",
-          "description": "Add a delete icon button (Trash2 from Lucide) to each stress log entry in the daily breakdown list. When clicked, display an inline confirmation prompt ('Are you sure?') using an AlertDialog or simple confirm pattern. On confirmation, call the useDeleteStressReading mutation with the reading's ID, invalidate the stress readings query cache, and remove the entry from the UI optimistically. Handle error cases with a toast notification."
+          "description": "Within the 'Privacy & Data Control' section, add a sub-section for Selective Data Deletion. Import and render the existing SelectiveDataDeletionCard component. Position it below the section heading and above the Delete Account button. The SelectiveDataDeletionCard already provides UI for deleting individual stress readings, mood entries, clearing analytics history, and resetting device pairing, so simply integrate it into the layout with appropriate spacing and ensure it follows the blue/teal design tokens."
         },
         {
-          "path": "frontend/src/pages/Journal.tsx",
+          "path": "frontend/src/components/SelectiveDataDeletionCard.tsx",
           "operation": "modify",
-          "description": "Add a delete icon button (Trash2 from Lucide) to each mood journal entry in the past entries list. When clicked, display an inline confirmation prompt ('Are you sure?'). On confirmation, call the useDeleteMoodEntry mutation with the entry's ID, invalidate the mood entries query cache, and remove the entry from the UI optimistically. Handle error cases with a toast notification."
+          "description": "Review and enhance the SelectiveDataDeletionCard component to ensure it provides clear action buttons for: (1) deleting individual stress log entries via the deleteStressReading(timestamp) backend method with a confirmation dialog, (2) deleting individual mood entries via the deleteMoodEntry(timestamp) backend method with a confirmation dialog, (3) clearing all analytics history via the clearAnalyticsHistory() backend method with a confirmation dialog, and (4) resetting device pairing data via the resetDevicePairing() backend method with a confirmation dialog. Each action must show a confirmation dialog before executing and display a toast notification on success or failure using the toast utility. Use the existing mutation hooks from useQueries.ts (add new ones if needed). Ensure the component uses Tailwind styling consistent with the blue/teal theme and is fully responsive."
         },
         {
-          "path": "frontend/src/pages/Privacy.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a 'Manage My Data' section to the Privacy Dashboard with two destructive action buttons: 'Clear Analytics History' and 'Reset Device Data'. Each button should display an inline confirmation dialog before executing. 'Clear Analytics History' calls the useClearAnalyticsHistory mutation and invalidates the stress readings cache. 'Reset Device Data' calls the useClearDevicePairings mutation and invalidates the device pairings cache. Both buttons should be styled with destructive/warning colors and show success toasts on completion."
+          "description": "Add or verify mutation hooks for selective data deletion: useDeleteStressReading(timestamp: bigint), useDeleteMoodEntry(timestamp: bigint), useClearAnalyticsHistory(), and useResetDevicePairing(). Each hook should wrap the corresponding backend method, handle success/error states, invalidate relevant query caches (e.g., stress readings, mood entries, analytics), and display appropriate toast notifications. Export these hooks for use in SelectiveDataDeletionCard."
         }
       ]
     },
     {
       "id": "REQ-6",
-      "summary": "Enhance data export feature with JSON, CSV, and PDF format options",
+      "summary": "Add 'Download My Data' button inside Privacy & Data Control section with export format options (JSON, CSV, PDF summary) using existing dataExport.ts utility functions for secure in-app client-side download.",
       "acceptanceCriteria": [
-        "Settings page export section shows a format selector with JSON, CSV, and PDF options.",
-        "Selecting JSON and clicking download triggers the existing JSON export, producing a timestamped `.json` file.",
-        "Selecting CSV and clicking download produces a `.csv` file with columns: date, stressScore, heartRate, skinTemp, motion.",
-        "Selecting PDF and clicking download produces a `.pdf` file (or a `.html` print-ready file) with a structured summary report including user name, total sessions, average stress score, and a readable 7-day data table.",
-        "`frontend/src/utils/dataExport.ts` exports `exportAsCSV` and `exportAsPDF` functions.",
-        "All downloads use a timestamped filename pattern (e.g., `tranquil-export-2024-01-15.csv`)."
+        "'Download My Data' button is visible in the Privacy & Data Control section.",
+        "Clicking the button presents three format options: JSON, CSV, PDF summary.",
+        "Selecting JSON triggers a client-side download of all user data as a JSON file.",
+        "Selecting CSV triggers a client-side download of stress readings as a CSV file.",
+        "Selecting PDF triggers a client-side download of an HTML/PDF summary report.",
+        "Exported data includes stress readings, mood entries, sleep data, and profile info.",
+        "Export functions are sourced from the existing dataExport.ts utility."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/utils/dataExport.ts",
+          "path": "frontend/src/pages/Settings.tsx",
           "operation": "modify",
-          "description": "Add two new export utility functions: `exportAsCSV(data: UserDataView, filename: string)` that converts stress readings into a flat CSV with columns (date, stressScore, heartRate, skinTemp, motion) and triggers a browser download; and `exportAsPDF(data: UserDataView, profile: UserProfile, filename: string)` that generates a structured HTML-based summary report (or uses a library like jsPDF) including user name, avatar, total sessions, average stress score, mood trend, and a 7-day stress data table, then triggers download as a PDF or print-ready HTML file. Both functions should use timestamped filenames following the pattern `tranquil-export-YYYY-MM-DD.<ext>`."
+          "description": "Within the 'Privacy & Data Control' section, add a 'Download My Data' subsection positioned below the Selective Data Deletion card. Import and render the existing DataExportCard component, which already provides UI for exporting user data in JSON, CSV, and PDF formats using the dataExport.ts utility. Ensure the card is styled consistently with the blue/teal theme and positioned with appropriate spacing. The DataExportCard handles the format selection and triggers client-side downloads, so simply integrate it into the layout."
         },
+        {
+          "path": "frontend/src/components/DataExportCard.tsx",
+          "operation": "modify",
+          "description": "Review and verify that the existing DataExportCard component provides three clear action buttons or a dropdown for selecting export formats: JSON, CSV, and PDF summary. Ensure it calls the existing dataExport.ts utility functions (exportUserDataAsJSON, exportStressDataAsCSV, exportUserDataAsPDF) with the user's full data (stress readings, mood entries, sleep data, profile info). The component should fetch all necessary data using the existing query hooks from useQueries.ts (getUserData or individual data queries), then trigger secure in-app client-side downloads via the utility functions. Ensure loading states and error handling with toast notifications are in place. Verify the component styling matches the blue/teal theme and is responsive."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Display security information prominently within Privacy & Data Control section using the existing SecurityInfoCard component, listing six security features with icons and descriptions.",
+      "acceptanceCriteria": [
+        "A security information card is shown in the Privacy & Data Control section.",
+        "The card lists all six security features: AES-256, BLE encryption, Firebase Security Rules, MFA, biometric re-auth, and HTTPS.",
+        "Each feature has an icon and a brief plain-English description.",
+        "The card uses the existing SecurityInfoCard component or an equivalent styled component."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/pages/Settings.tsx",
           "operation": "modify",
-          "description": "Add a format selector (RadioGroup or SegmentedControl with options: JSON, CSV, PDF) above the existing data export download button. Update the download button's click handler to call the appropriate export function based on the selected format: `exportUserData` for JSON, `exportAsCSV` for CSV, or `exportAsPDF` for PDF. Ensure the user data and profile are fetched via the existing useGetUserData query before triggering the export."
+          "description": "Within the 'Privacy & Data Control' section, add a Security Information subsection positioned below the Download My Data card. Import and render the existing SecurityInfoCard component, which displays the six security features: AES-256 encryption, BLE encryption, Firebase Security Rules, MFA, biometric re-authentication, and HTTPS backend. Ensure the card is styled consistently with the blue/teal theme and has appropriate spacing. The SecurityInfoCard already provides icons and descriptions, so simply integrate it into the layout."
+        },
+        {
+          "path": "frontend/src/components/SecurityInfoCard.tsx",
+          "operation": "modify",
+          "description": "Review and verify that the existing SecurityInfoCard component lists all six security features with clear icons and plain-English descriptions: (1) AES-256 encryption for stored data, (2) Encrypted BLE communication, (3) Firebase Security Rules enforcement, (4) Multi-factor authentication option, (5) Biometric re-authentication, and (6) HTTPS secure backend. Ensure each feature has an appropriate Lucide icon (Lock, Shield, Key, Fingerprint, Globe, etc.) and a brief reassuring description. The component should be styled with the blue/teal design tokens, use Tailwind grid or flex for layout, and be fully responsive. No backend calls are needed for this component; it is informational only."
         }
       ]
     },
     {
       "id": "REQ-8",
-      "summary": "Add GDPR/compliance UI layer with Terms & Conditions acceptance modal and Privacy Policy links",
+      "summary": "Add Compliance sub-section within Privacy & Data Control displaying GDPR/Indian IT compliance summary, user consent timestamps via ComplianceCard, policy links via PolicyModal, and privacy-first messaging statement.",
       "acceptanceCriteria": [
-        "First-time users see a T&C / Privacy Policy acceptance modal before the profile setup modal.",
-        "The 'Continue' button on the acceptance modal is disabled until the acceptance checkbox is checked.",
-        "Accepting the T&C calls a backend function that records `termsAcceptedAt` timestamp on the user profile.",
-        "Users who have already accepted are not shown the modal again on subsequent logins.",
-        "Settings page footer contains 'Privacy Policy' and 'Terms & Conditions' links that open a read-only modal.",
-        "Privacy Dashboard includes a 'Data Usage Explanation' section with plain-language descriptions of data collection, purpose, and retention period.",
-        "`UserProfile` in `backend/main.mo` includes a `termsAcceptedAt: ?Int` field and a `recordTermsAcceptance()` function."
+        "Compliance sub-section is visible in Privacy & Data Control.",
+        "A statement about GDPR and Indian IT data protection compliance is displayed.",
+        "User's consent timestamps for Privacy Policy and Terms & Conditions are shown via ComplianceCard.",
+        "Links to view the full Privacy Policy and Terms of Service open the existing PolicyModal.",
+        "A clear privacy-first statement such as 'You have full ownership and control over your mental health data.' is displayed."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/components/TermsAcceptanceModal.tsx",
-          "operation": "create",
-          "description": "Create a modal component for first-time Terms & Conditions and Privacy Policy acceptance. Display a scrollable summary of data practices, a checkbox labeled 'I accept the Terms & Conditions and Privacy Policy', and a 'Continue' button that remains disabled until the checkbox is checked. On Continue, call the useRecordTermsAcceptance mutation hook to record the timestamp in the backend user profile, then close the modal. Use the Dialog component from shadcn/ui. Style consistently with TRANQUIL design system."
-        },
-        {
-          "path": "frontend/src/components/PolicyModal.tsx",
-          "operation": "create",
-          "description": "Create a read-only modal component for displaying full Privacy Policy or Terms & Conditions text. Accept a `type` prop ('privacy' | 'terms') to determine which policy to display. Use the Dialog component from shadcn/ui with scrollable content and a close button. Style consistently with TRANQUIL design system."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Update the AuthGuard to check whether the user has accepted terms using the useGetUserPrivacyPreferences query (checking for termsAcceptedAt field). If authenticated but termsAcceptedAt is null, render the TermsAcceptanceModal before showing the ProfileSetupModal. Ensure proper sequencing: login → terms acceptance → profile setup → app access."
-        },
         {
           "path": "frontend/src/pages/Settings.tsx",
           "operation": "modify",
-          "description": "Add a footer section to the Settings page with links for 'Privacy Policy' and 'Terms & Conditions'. Each link should open the PolicyModal component with the appropriate type prop. Style the links as subtle text links with hover states."
+          "description": "Within the 'Privacy & Data Control' section, add a Compliance subsection positioned below the Security Information card. Display a compliance summary text: 'We adhere to GDPR principles and Indian IT data protection standards to ensure your mental health data is secure and under your control.' Import and render the existing ComplianceCard component to show the user's consent timestamps for Privacy Policy and Terms of Service. Below the ComplianceCard, add a privacy-first messaging statement in a highlighted or bordered box: 'You have full ownership and control over your mental health data. We will never share or sell your data without your explicit consent.' Ensure the subsection is styled with the blue/teal theme and has appropriate spacing."
         },
         {
-          "path": "frontend/src/pages/Privacy.tsx",
+          "path": "frontend/src/components/ComplianceCard.tsx",
           "operation": "modify",
-          "description": "Ensure the Privacy Dashboard includes a 'Data Usage Explanation' section (if not already added in REQ-3) with plain-language descriptions of what data is collected (stress readings, mood entries, sleep data, breathing sessions, device pairings), why it is used (personalized wellness insights, trend analysis), and how long it is retained (indefinitely until user deletion or account removal). Style as an informational card or section with readable typography."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Update React Query hooks to include all new privacy and deletion mutations and queries",
-      "acceptanceCriteria": [
-        "All listed mutation hooks exist and are exported from `useQueries.ts`.",
-        "Each mutation hook calls the corresponding backend actor method.",
-        "On success, each mutation invalidates the appropriate React Query cache keys (e.g., `['userProfile']`, `['stressReadings']`, `['moodEntries']`).",
-        "`useGetUserPrivacyPreferences` returns `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile query.",
-        "TypeScript types are correctly inferred with no `any` casts."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Add the following new mutation hooks: `useRequestAccountDeletion`, `useCancelAccountDeletion`, `useDeleteStressReading`, `useDeleteMoodEntry`, `useClearAnalyticsHistory`, `useAddDevicePairing`, `useRemoveDevicePairing`, `useClearDevicePairings`, `useUpdatePrivacyPreferences`, `useRecordTermsAcceptance`. Each mutation should call the corresponding backend actor method and invalidate relevant query cache keys on success (['userProfile'], ['stressReadings'], ['moodEntries'], ['userData'], etc.). Add a new query hook `useGetUserPrivacyPreferences` that reads `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile query (this can be derived from the existing `useGetCallerUserProfile` query or be a separate focused query). Ensure proper TypeScript typing throughout with no `any` casts."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Apply cohesive visual upgrade with gradients, glassmorphism, glow effects, and animations",
-      "acceptanceCriteria": [
-        "Dashboard hero section displays a teal-to-indigo gradient background.",
-        "Card components use a frosted-glass / glassmorphism surface style with backdrop-blur.",
-        "Stress gauge and breathing circle have a soft ambient glow effect.",
-        "Page transitions include a fade-in + slide-up entrance animation.",
-        "All interactive elements (buttons, tiles, toggles) have visible hover and active press states.",
-        "New accent color tokens (teal, sage, gold) are defined as OKLCH CSS variables in `frontend/src/index.css`.",
-        "Visual consistency is maintained across light mode, dark mode, mobile, tablet, and desktop viewports."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add new OKLCH CSS custom property tokens for jewel-tone accent colors (teal, sage green, soft gold) in both light and dark theme blocks. Define gradient variables for teal-to-indigo backgrounds. Add utility classes or update existing tokens for glassmorphism card surfaces (backdrop-blur, semi-transparent backgrounds). Ensure all new color tokens follow the existing OKLCH variable structure and are theme-aware (light/dark variants)."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Extend the Tailwind theme configuration to include the new jewel-tone accent colors (teal, sage, gold) as custom color utilities. Add animation keyframes for fade-in and slide-up entrance animations. Define backdrop-blur utility classes if not already present. Ensure all extensions are compatible with existing TRANQUIL design system tokens."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Update the Dashboard hero section to use a teal-to-indigo gradient background (using the new CSS variables or Tailwind gradient utilities). Apply the gradient as a background overlay or container background. Ensure the greeting and stress gauge remain visually prominent against the gradient. Verify responsiveness and theme consistency."
-        },
-        {
-          "path": "frontend/src/components/StressGauge.tsx",
-          "operation": "modify",
-          "description": "Add a soft ambient glow effect to the stress gauge SVG using CSS filters (drop-shadow or box-shadow with blur and color matching the stress level). Apply glow dynamically based on the current stress level (low/medium/high). Ensure the glow is subtle and enhances visual appeal without overwhelming the gauge display."
-        },
-        {
-          "path": "frontend/src/components/BreathingCircle.tsx",
-          "operation": "modify",
-          "description": "Add a soft ambient glow effect to the breathing circle element using CSS filters or radial gradient overlays. Apply the glow during the inhale/exhale phases to enhance the calming visual. Ensure the animation remains smooth and the glow effect is theme-aware."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add global CSS classes or animations for page entrance effects (fade-in + slide-up) on route transitions. Apply these animations to the main content Outlet wrapper or individual page containers. Use Tailwind's animate utilities or CSS @keyframes. Ensure animations are subtle, fast (200-300ms), and do not interfere with navigation or accessibility."
-        },
-        {
-          "path": "frontend/src/components/ui/button.tsx",
-          "operation": "modify",
-          "description": "Enhance all button variants with visible hover and active press states using scale transforms, brightness adjustments, or shadow changes. Ensure transitions are smooth (150-200ms) and apply consistently across all button sizes and variants. Verify accessibility (focus states remain visible)."
-        },
-        {
-          "path": "frontend/src/components/ui/card.tsx",
-          "operation": "modify",
-          "description": "Update Card component styles to use glassmorphism surface styling: semi-transparent backgrounds using the new CSS variables, backdrop-blur utility classes, and subtle borders. Ensure the frosted-glass effect works in both light and dark themes and remains readable over gradient backgrounds."
+          "description": "Review and verify that the existing ComplianceCard component fetches and displays the user's consent records using the getConsents query hook from useQueries.ts. The card should show timestamps for 'Privacy Policy' and 'Terms of Service' consents in a clean table or list format. Each consent record should have a 'View' button that opens the PolicyModal component with the appropriate policy type ('privacy' or 'terms'). Ensure the card uses the blue/teal design tokens, is fully responsive, and handles cases where consent records are missing with appropriate placeholder text. Verify the PolicyModal component's usage instructions before implementing the integration."
         }
       ]
     }

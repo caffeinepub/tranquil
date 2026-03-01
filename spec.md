@@ -1,17 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Add a Privacy Dashboard with full data ownership controls, account deletion flow, selective data deletion, enhanced data export formats, GDPR compliance UI, and a visual upgrade to the TRANQUIL app.
+**Goal:** Add a comprehensive "Privacy & Data Control" section inside the Settings page of the TRANQUIL app, covering full account deletion, selective data deletion, data download, security information, and compliance details.
 
 **Planned changes:**
-- Add a `/privacy` Privacy Dashboard page accessible from Settings and Profile, displaying stored data summary cards, data usage explanation, analytics/AI prediction toggles, connected devices management, and a red "Delete My Account" button
-- Implement account deletion flow: confirmation modal requiring user to type "DELETE", soft-delete backend flag (`pendingDeletion`, `deletionScheduledAt` with 30-day grace period), cache clearing, logout, and success toast
-- Add selective data deletion controls: delete icons on individual stress log and mood journal entries with inline "Are you sure?" confirmation, "Clear Analytics History" button, and "Reset Device Data" button in the Privacy Dashboard
-- Extend data export in Settings with a format selector (JSON / CSV / PDF) and implement `exportAsCSV` and `exportAsPDF` utility functions in `dataExport.ts`
-- Add GDPR compliance UI: Terms & Conditions / Privacy Policy acceptance modal on first login (with `termsAcceptedAt` recorded on backend), policy links in Settings footer, and plain-language data usage explanation in Privacy Dashboard
-- Update `UserProfile` Motoko type with `pendingDeletion`, `deletionScheduledAt`, `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, and `termsAcceptedAt` fields
-- Implement all new backend Motoko functions: `requestAccountDeletion`, `cancelAccountDeletion`, `deleteStressReading`, `deleteMoodEntry`, `clearAnalyticsHistory`, `addDevicePairing`, `removeDevicePairing`, `clearDevicePairings`, `updatePrivacyPreferences`, `recordTermsAcceptance` — all with caller-authorization checks
-- Add all corresponding React Query hooks in `useQueries.ts` with proper cache invalidation
-- Apply visual upgrade: teal-to-indigo gradient on Dashboard hero, glassmorphism card surfaces, ambient glow on stress gauge and breathing circle, fade-in/slide-up page entrance animations, hover/press micro-interactions, and new OKLCH accent color tokens (teal, sage green, soft gold)
+- Add a "Privacy & Data Control" section to the Settings page with a calm blue/teal theme, plain-English labels, and no dark patterns
+- Implement a Full Account Deletion flow with a red "Delete Account" button, multi-step confirmation modal, password/biometric re-authentication, permanent warning message, optional 7-day recovery period toggle, and backend deletion of all user data (profile, stress logs, mood logs, sleep data, device history)
+- Add backend `deleteAllUserData` actor method that removes all records for the calling user from every data Map, and a `logDeletionEvent` method that records a timestamped anonymous deletion event — both enforcing caller-based authorization
+- Implement Selective Data Deletion sub-section allowing users to independently delete individual stress log entries, individual mood entries, all analytics history, and device pairing data — each with a confirmation dialog and toast notification
+- Add a "Download My Data" button with export format options (JSON, CSV, PDF summary) using the existing `dataExport.ts` utility for client-side downloads including stress readings, mood entries, sleep data, and profile info
+- Display a SecurityInfoCard listing six security features (AES-256 encryption, encrypted BLE, Firebase Security Rules, MFA, biometric re-auth, HTTPS) with icons and brief descriptions
+- Add a Compliance sub-section showing GDPR and Indian IT data protection adherence, user consent timestamps via ComplianceCard, links to Privacy Policy and Terms of Service via PolicyModal, and a privacy-first ownership statement
+- Invalidate all active React Query caches after account deletion
 
-**User-visible outcome:** Users can view and control all their stored data from a dedicated Privacy Dashboard, delete their account or individual data entries, export data in JSON/CSV/PDF formats, and accept privacy terms on first login. The app also has a more premium, calming visual design with gradient backgrounds, frosted glass cards, and smooth animations.
+**User-visible outcome:** Users can visit the Settings page to manage all aspects of their privacy and data — including deleting their account or specific data entries, downloading their data in multiple formats, reviewing security practices, and checking compliance and consent records.
