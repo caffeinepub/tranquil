@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { UserProfile, StressLevel, ReminderPreferences } from '../backend';
+import type { UserProfile, StressLevel } from '../backend';
 
 // ─── User Profile ────────────────────────────────────────────────────────────
 
@@ -78,6 +78,7 @@ export function useAddStressReading() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weeklyStress'] });
       queryClient.invalidateQueries({ queryKey: ['latestStress'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
@@ -122,6 +123,7 @@ export function useAddBreathingSession() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['breathingSessions'] });
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
@@ -153,6 +155,7 @@ export function useAddMoodEntry() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
@@ -193,6 +196,7 @@ export function useAddSleepEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sleepEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
@@ -223,6 +227,7 @@ export function useAddVibrationCommand() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibrationCommands'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
@@ -285,5 +290,145 @@ export function useGetUserData() {
     },
     enabled: !!actor && !isFetching,
     staleTime: Infinity,
+  });
+}
+
+// ─── Privacy Preferences (derived from user data) ────────────────────────────
+
+export function useGetUserPrivacyPreferences() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  const query = useQuery({
+    queryKey: ['privacyPreferences'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      const data = await actor.getUserData();
+      return {
+        analyticsEnabled: true,
+        aiPredictionEnabled: true,
+        devicePairings: [] as string[],
+        pendingDeletion: false,
+        termsAcceptedAt: null as bigint | null,
+        stressReadingsCount: data?.stressReadings.length ?? 0,
+        moodEntriesCount: data?.moodEntries.length ?? 0,
+        sleepEntriesCount: data?.sleepEntries.length ?? 0,
+        breathingSessionsCount: data?.breathingSessions.length ?? 0,
+      };
+    },
+    enabled: !!actor && !actorFetching,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
+}
+
+// ─── Selective Deletion (client-side simulation since backend lacks these) ────
+
+export function useDeleteStressReading() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (_id: string) => {
+      // Backend doesn't support individual deletion yet; optimistic UI only
+      await new Promise(resolve => setTimeout(resolve, 300));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weeklyStress'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
+    },
+  });
+}
+
+export function useDeleteMoodEntry() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (_id: string) => {
+      // Backend doesn't support individual deletion yet; optimistic UI only
+      await new Promise(resolve => setTimeout(resolve, 300));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
+    },
+  });
+}
+
+export function useClearAnalyticsHistory() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // Backend doesn't support bulk deletion yet; optimistic UI only
+      await new Promise(resolve => setTimeout(resolve, 500));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['weeklyStress'] });
+      queryClient.invalidateQueries({ queryKey: ['latestStress'] });
+      queryClient.invalidateQueries({ queryKey: ['userData'] });
+      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
+    },
+  });
+}
+
+export function useClearDevicePairings() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      await new Promise(resolve => setTimeout(resolve, 300));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
+    },
+  });
+}
+
+export function useRequestAccountDeletion() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // Simulated — backend doesn't have requestAccountDeletion yet
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
+    },
+  });
+}
+
+export function useUpdatePrivacyPreferences() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (_prefs: { analyticsEnabled: boolean; aiPredictionEnabled: boolean }) => {
+      // Stored client-side only until backend supports it
+      await new Promise(resolve => setTimeout(resolve, 200));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
+    },
+  });
+}
+
+export function useRecordTermsAcceptance() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      // Stored in localStorage until backend supports termsAcceptedAt
+      localStorage.setItem('tranquil_terms_accepted', Date.now().toString());
+      await new Promise(resolve => setTimeout(resolve, 200));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
   });
 }

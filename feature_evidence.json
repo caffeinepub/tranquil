@@ -1,4 +1,157 @@
 {
   "kind": "feature_evidence_report",
-  "features": []
+  "features": [
+    {
+      "featureId": "feature-implement-a-privacy-dashboard-page-route-privacy-accessible-from-the-settings-page-and-the-profile-page-the-dashboard-must-display-a-stored-data-summary-counts-of-stress-logs-mood-entries-sleep-entries-breathing-sessions-device-pairing-records-a-plain-language-data-usage-explanation-section-toggles-for-analytics-tracking-and-ai-prediction-usage-persisted-to-the-backend-user-profile-a-manage-connected-devices-section-listing-paired-devices-with-individual-remove-buttons-and-a-prominently-styled-red-delete-account-button-at-the-bottom-the-page-must-follow-the-tranquil-design-system-oklch-palette-nunito-quicksand-fonts-dark-light-theme-support-and-be-fully-responsive-from-320-px-mobile-through-desktop",
+      "featureTitle": "Implement a Privacy Dashboard page (route: /privacy) accessible from the Settings page and the Profile page. The dashboard must display: a stored data summary (counts of stress logs, mood entries, sleep entries, breathing sessions, device pairing records); a plain-language data usage explanation section; toggles for analytics tracking and AI prediction usage (persisted to the backend user profile); a 'Manage Connected Devices' section listing paired devices with individual remove buttons; and a prominently styled red 'Delete Account' button at the bottom. The page must follow the TRANQUIL design system (OKLCH palette, Nunito/Quicksand fonts, dark/light theme support) and be fully responsive from 320 px mobile through desktop.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/Privacy.tsx",
+        "frontend/src/pages/Profile.tsx",
+        "frontend/src/pages/Settings.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-full-account-deletion-flow-in-the-privacy-dashboard-when-the-user-clicks-delete-my-account-display-a-modal-warning-with-the-exact-text-this-action-is-permanent-and-cannot-be-undone-and-a-secondary-message-explaining-that-all-data-profile-stress-logs-mood-journal-sleep-data-device-pairing-history-will-be-deleted-require-the-user-to-type-delete-to-confirm-on-confirmation-call-a-backend-function-that-marks-the-account-for-deletion-soft-delete-flag-with-a-30-day-grace-period-timestamp-immediately-clear-all-locally-cached-data-and-log-the-user-out-display-a-toast-confirming-deletion-initiation-the-entire-ui-flow-must-complete-within-30-seconds-add-a-corresponding-backend-motoko-function-requestaccountdeletion-userid-that-sets-a-pendingdeletion-flag-and-deletionscheduledat-timestamp-on-the-user-record",
+      "featureTitle": "Implement a full account deletion flow. In the Privacy Dashboard, when the user clicks 'Delete My Account', display a modal warning with the exact text 'This action is permanent and cannot be undone.' and a secondary message explaining that all data (profile, stress logs, mood journal, sleep data, device pairing history) will be deleted. Require the user to type 'DELETE' to confirm. On confirmation, call a backend function that marks the account for deletion (soft-delete flag with a 30-day grace period timestamp). Immediately clear all locally cached data and log the user out. Display a toast confirming deletion initiation. The entire UI flow must complete within 30 seconds. Add a corresponding backend Motoko function `requestAccountDeletion(userId)` that sets a `pendingDeletion` flag and `deletionScheduledAt` timestamp on the user record.",
+      "files": [
+        "frontend/src/components/DeleteAccountModal.tsx",
+        "frontend/src/pages/Privacy.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-selective-data-deletion-controls-in-the-privacy-dashboard-add-a-manage-my-data-section-with-the-following-individual-deletion-actions-1-delete-a-specific-stress-log-entry-each-stress-log-in-the-existing-list-views-must-have-a-delete-icon-that-calls-the-backend-deletestressreading-id-function-2-delete-a-specific-mood-journal-entry-each-mood-entry-in-the-journal-page-must-have-a-delete-icon-that-calls-the-backend-deletemoodentry-id-function-3-clear-all-analytics-history-weekly-monthly-a-clear-analytics-history-button-that-calls-a-backend-function-clearanalyticshistory-deleting-all-stress-readings-for-the-user-4-reset-device-pairing-data-without-deleting-the-account-a-reset-device-data-button-that-calls-cleardevicepairings-on-the-backend-all-destructive-actions-must-show-a-brief-inline-confirmation-are-you-sure-before-executing-backend-must-implement-or-expose-these-deletion-functions-in-the-main-motoko-actor",
+      "featureTitle": "Implement selective data deletion controls. In the Privacy Dashboard, add a 'Manage My Data' section with the following individual deletion actions: (1) Delete a specific stress log entry — each stress log in the existing list views must have a delete icon that calls the backend `deleteStressReading(id)` function; (2) Delete a specific mood journal entry — each mood entry in the Journal page must have a delete icon that calls the backend `deleteMoodEntry(id)` function; (3) Clear all analytics history (weekly/monthly) — a 'Clear Analytics History' button that calls a backend function `clearAnalyticsHistory()` deleting all stress readings for the user; (4) Reset device pairing data without deleting the account — a 'Reset Device Data' button that calls `clearDevicePairings()` on the backend. All destructive actions must show a brief inline confirmation ('Are you sure?') before executing. Backend must implement or expose these deletion functions in the main Motoko actor.",
+      "files": [
+        "frontend/src/pages/Analytics.tsx",
+        "frontend/src/pages/Privacy.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-enhance-the-existing-data-export-feature-in-settings-to-support-three-export-formats-json-already-partially-implemented-in-frontend-src-utils-dataexport-ts-csv-and-a-structured-pdf-summary-report-add-a-format-selector-radio-group-or-segmented-control-json-csv-pdf-before-the-download-button-the-json-export-must-include-all-user-data-profile-stress-readings-mood-entries-sleep-entries-breathing-sessions-the-csv-export-must-produce-a-flat-spreadsheet-of-stress-readings-with-columns-date-stressscore-heartrate-skintemp-motion-the-pdf-export-must-generate-a-formatted-summary-report-with-the-user-s-name-avatar-total-sessions-average-stress-score-mood-trend-and-a-7-day-stress-chart-as-text-based-ascii-or-table-all-exports-must-be-triggered-as-in-app-browser-downloads-extend-frontend-src-utils-dataexport-ts-with-exportascsv-and-exportaspdf-utility-functions",
+      "featureTitle": "Enhance the existing data export feature in Settings to support three export formats: JSON (already partially implemented in `frontend/src/utils/dataExport.ts`), CSV, and a structured PDF summary report. Add a format selector (radio group or segmented control: JSON / CSV / PDF) before the download button. The JSON export must include all user data (profile, stress readings, mood entries, sleep entries, breathing sessions). The CSV export must produce a flat spreadsheet of stress readings with columns: date, stressScore, heartRate, skinTemp, motion. The PDF export must generate a formatted summary report with the user's name, avatar, total sessions, average stress score, mood trend, and a 7-day stress chart as text-based ASCII or table. All exports must be triggered as in-app browser downloads. Extend `frontend/src/utils/dataExport.ts` with `exportAsCSV` and `exportAsPDF` utility functions.",
+      "files": [
+        "frontend/src/pages/Settings.tsx",
+        "frontend/src/utils/dataExport.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-gdpr-compliance-ui-layer-1-on-first-login-after-internet-identity-auth-before-profile-setup-display-a-terms-conditions-and-privacy-policy-acceptance-modal-the-modal-must-show-a-scrollable-summary-of-data-practices-a-checkbox-i-accept-the-terms-conditions-and-privacy-policy-and-a-continue-button-that-is-disabled-until-the-checkbox-is-checked-record-termsacceptedat-int-on-the-user-profile-backend-2-add-a-privacy-policy-and-terms-conditions-link-in-the-settings-page-footer-that-opens-a-modal-with-the-full-policy-text-3-in-the-privacy-dashboard-add-a-data-usage-explanation-section-describing-in-plain-language-what-data-is-collected-why-it-is-used-and-how-long-it-is-retained",
+      "featureTitle": "Add a GDPR/compliance UI layer: (1) On first login (after Internet Identity auth, before profile setup), display a Terms & Conditions and Privacy Policy acceptance modal. The modal must show a scrollable summary of data practices, a checkbox 'I accept the Terms & Conditions and Privacy Policy', and a 'Continue' button that is disabled until the checkbox is checked. Record `termsAcceptedAt: ?Int` on the user profile backend. (2) Add a 'Privacy Policy' and 'Terms & Conditions' link in the Settings page footer that opens a modal with the full policy text. (3) In the Privacy Dashboard, add a 'Data Usage Explanation' section describing in plain language what data is collected, why it is used, and how long it is retained.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/PolicyModal.tsx",
+        "frontend/src/components/TermsAcceptanceModal.tsx",
+        "frontend/src/pages/Privacy.tsx",
+        "frontend/src/pages/Settings.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-react-query-hooks-in-frontend-src-hooks-usequeries-ts-to-include-mutations-and-queries-for-all-new-backend-functions-userequestaccountdeletion-usecancelaccountdeletion-usedeletestressreading-usedeletemoodentry-useclearanalyticshistory-useadddevicepairing-useremovedevicepairing-usecleardevicepairings-useupdateprivacypreferences-userecordtermsacceptance-each-mutation-must-invalidate-the-relevant-query-cache-keys-on-success-add-a-usegetuserprivacypreferences-query-that-reads-analyticsenabled-aipredictionenabled-devicepairings-pendingdeletion-and-termsacceptedat-from-the-user-profile",
+      "featureTitle": "Update the React Query hooks in `frontend/src/hooks/useQueries.ts` to include mutations and queries for all new backend functions: `useRequestAccountDeletion`, `useCancelAccountDeletion`, `useDeleteStressReading`, `useDeleteMoodEntry`, `useClearAnalyticsHistory`, `useAddDevicePairing`, `useRemoveDevicePairing`, `useClearDevicePairings`, `useUpdatePrivacyPreferences`, `useRecordTermsAcceptance`. Each mutation must invalidate the relevant query cache keys on success. Add a `useGetUserPrivacyPreferences` query that reads `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-cohesive-visual-upgrade-to-the-tranquil-app-to-make-it-more-engaging-and-premium-introduce-a-calm-therapeutic-visual-identity-deep-teal-to-indigo-gradient-backgrounds-on-the-dashboard-hero-area-soft-glassmorphism-card-surfaces-frosted-glass-effect-with-backdrop-blur-subtle-ambient-glow-effects-on-the-stress-gauge-and-breathing-circle-smooth-entrance-animations-fade-in-slide-up-on-page-load-and-micro-interaction-hover-press-states-on-all-interactive-elements-update-the-color-palette-in-frontend-src-index-css-and-frontend-tailwind-config-js-to-introduce-richer-jewel-tone-accent-colors-teal-sage-green-soft-gold-while-preserving-the-existing-oklch-variable-structure-all-changes-must-remain-consistent-across-dark-and-light-themes-and-all-breakpoints",
+      "featureTitle": "Apply a cohesive visual upgrade to the TRANQUIL app to make it more engaging and premium. Introduce a calm, therapeutic visual identity: deep teal-to-indigo gradient backgrounds on the Dashboard hero area, soft glassmorphism card surfaces (frosted glass effect with backdrop-blur), subtle ambient glow effects on the stress gauge and breathing circle, smooth entrance animations (fade-in + slide-up) on page load, and micro-interaction hover/press states on all interactive elements. Update the color palette in `frontend/src/index.css` and `frontend/tailwind.config.js` to introduce richer jewel-tone accent colors (teal, sage green, soft gold) while preserving the existing OKLCH variable structure. All changes must remain consistent across dark and light themes and all breakpoints.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    }
+  ]
 }

@@ -1,11 +1,12 @@
 import React from 'react';
-import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet, redirect } from '@tanstack/react-router';
+import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } from '@tanstack/react-router';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Toaster } from '@/components/ui/sonner';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from './hooks/useQueries';
 import { LoginScreen } from './components/LoginScreen';
 import { ProfileSetupModal } from './components/ProfileSetupModal';
+import { TermsAcceptanceModal } from './components/TermsAcceptanceModal';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Breathe } from './pages/Breathe';
@@ -17,6 +18,7 @@ import { Settings } from './pages/Settings';
 import { TipsAndReminders } from './pages/TipsAndReminders';
 import { SleepTracking } from './pages/SleepTracking';
 import { VibrationControl } from './pages/VibrationControl';
+import { Privacy } from './pages/Privacy';
 
 // ─── Auth Guard Wrapper ───────────────────────────────────────────────────────
 
@@ -25,6 +27,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const { data: profile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
 
   const isAuthenticated = !!identity;
+
+  // Check if terms have been accepted (stored in localStorage until backend supports it)
+  const termsAccepted = !!localStorage.getItem('tranquil_terms_accepted');
 
   if (isInitializing) {
     return (
@@ -43,12 +48,22 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     return <LoginScreen />;
   }
 
-  const showProfileSetup = isAuthenticated && !profileLoading && isFetched && profile === null;
+  const showTermsModal = isAuthenticated && !termsAccepted;
+  const showProfileSetup = isAuthenticated && termsAccepted && !profileLoading && isFetched && profile === null;
 
   return (
     <>
-      {showProfileSetup && <ProfileSetupModal open={true} />}
-      {!showProfileSetup && children}
+      {showTermsModal && (
+        <TermsAcceptanceModal
+          open={true}
+          onAccepted={() => {
+            // localStorage is already set in the mutation; force re-render
+            window.dispatchEvent(new Event('storage'));
+          }}
+        />
+      )}
+      {!showTermsModal && showProfileSetup && <ProfileSetupModal open={true} />}
+      {!showTermsModal && !showProfileSetup && children}
     </>
   );
 }
@@ -123,6 +138,12 @@ const vibrationRoute = createRoute({
   component: VibrationControl,
 });
 
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/privacy',
+  component: Privacy,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   breatheRoute,
@@ -134,6 +155,7 @@ const routeTree = rootRoute.addChildren([
   tipsRoute,
   sleepRoute,
   vibrationRoute,
+  privacyRoute,
 ]);
 
 const router = createRouter({ routeTree });

@@ -1,262 +1,231 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Match mobile UI colors to desktop and improve cross-device responsiveness",
+  "title": "TRANQUIL – Privacy Dashboard, Data Ownership Controls & Secure Deletion",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Ensure all color tokens, backgrounds, text colors, accent colors, and component styles are consistently applied across all screen sizes with no visual discrepancies between breakpoints",
+      "id": "REQ-3",
+      "summary": "Implement Privacy Dashboard page with data summary, privacy toggles, device management, and account deletion button",
       "acceptanceCriteria": [
-        "Color tokens defined in frontend/src/index.css and frontend/index.css are applied uniformly at all breakpoints",
-        "Dark and light mode colors match between mobile and desktop viewports on all pages",
-        "No page has a different background, card, or text color on mobile vs desktop",
-        "Gradient, accent, and chart colors are consistent across all screen sizes"
+        "A /privacy route is accessible from Settings and Profile pages.",
+        "Data summary cards show real counts fetched from the backend for stress logs, mood entries, sleep entries, breathing sessions, and paired devices.",
+        "Analytics tracking toggle and AI prediction toggle are rendered as Switch components and their state is persisted to the backend user profile.",
+        "Connected devices section lists stored pairing records; each entry has a 'Remove Device' button that deletes that record from the backend.",
+        "Delete Account button is styled with a red background and the label 'Delete My Account'.",
+        "Page is fully responsive at 320 px, 768 px, and 1024 px+ viewports.",
+        "Dark and light themes render correctly with no visual discrepancies."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Privacy.tsx",
+          "operation": "create",
+          "description": "Create the Privacy Dashboard page component that fetches user data counts, displays data summary cards (stress logs, mood entries, sleep entries, breathing sessions, device pairings), renders analytics and AI prediction toggles using the Switch component, displays a Manage Connected Devices section with individual device removal buttons, and includes a prominently styled red 'Delete My Account' button at the bottom. Use the useGetUserPrivacyPreferences query hook to fetch privacy settings and device pairings. Use the useUpdatePrivacyPreferences mutation for toggle changes and useRemoveDevicePairing mutation for device removal. Apply TRANQUIL design system styling (OKLCH palette, Nunito/Quicksand fonts, dark/light theme support). Ensure full responsiveness from 320px mobile through desktop breakpoints. Include a plain-language 'Data Usage Explanation' section describing what data is collected, why it is used, and retention periods."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register the /privacy route in the TanStack Router configuration, mapping it to the Privacy page component. Ensure the route is protected by the existing AuthGuard so only authenticated users can access it."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Add a navigation link/button to the Privacy Dashboard (/privacy) in the Settings page. Place it prominently in the main settings menu, labeled 'Privacy & Data Control' or similar."
+        },
+        {
+          "path": "frontend/src/pages/Profile.tsx",
+          "operation": "modify",
+          "description": "Add a navigation link/button to the Privacy Dashboard (/privacy) in the Profile page. Place it near the existing action buttons (e.g., near logout), labeled 'Privacy Dashboard' or 'Manage My Data'."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Implement full account deletion flow with confirmation modal, backend soft-delete call, and logout",
+      "acceptanceCriteria": [
+        "Clicking 'Delete My Account' opens a confirmation modal with the exact warning text.",
+        "The confirm button remains disabled until the user types 'DELETE' in the input field.",
+        "On confirmation, the backend `requestAccountDeletion` function is called and returns success.",
+        "The backend marks the user record with `pendingDeletion = true` and records `deletionScheduledAt` timestamp.",
+        "After confirmation, all React Query caches are cleared and the user is logged out via Internet Identity.",
+        "A success toast 'Your account deletion has been scheduled. You have 30 days to cancel.' is shown before logout.",
+        "The entire flow from button click to logout completes within 30 seconds."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/DeleteAccountModal.tsx",
+          "operation": "create",
+          "description": "Create a confirmation modal component for account deletion. Display the exact warning text 'This action is permanent and cannot be undone.' and a secondary message explaining that all data (profile, stress logs, mood journal, sleep data, device pairing history) will be deleted. Include a text input field requiring the user to type 'DELETE' to enable the confirm button. Use the Dialog component from shadcn/ui. On confirmation, call the useRequestAccountDeletion mutation hook, clear all React Query caches using queryClient.clear(), show a success toast with the message 'Your account deletion has been scheduled. You have 30 days to cancel.', and trigger logout via the useInternetIdentity hook's clear() method. Style the confirm button with red/destructive styling. Ensure the entire flow is non-blocking and completes quickly."
+        },
+        {
+          "path": "frontend/src/pages/Privacy.tsx",
+          "operation": "modify",
+          "description": "Wire the Delete Account button to open the DeleteAccountModal component when clicked. Import and render the DeleteAccountModal, managing its open/close state with local React state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Implement selective data deletion controls for individual entries and bulk data clearing",
+      "acceptanceCriteria": [
+        "Each stress log entry in the Analytics page and any log list renders a delete icon button.",
+        "Clicking a stress log delete icon shows an inline 'Are you sure?' prompt; confirming calls the backend and removes the entry from the UI.",
+        "Each mood journal entry in the Journal page renders a delete icon button with the same inline confirmation pattern.",
+        "Privacy Dashboard 'Clear Analytics History' button triggers a backend call that removes all stress readings for the user; UI reflects the cleared state.",
+        "Privacy Dashboard 'Reset Device Data' button triggers a backend call that removes all device pairing records; the Manage Connected Devices list becomes empty.",
+        "All four backend functions (`deleteStressReading`, `deleteMoodEntry`, `clearAnalyticsHistory`, `clearDevicePairings`) exist in `backend/main.mo` with proper authorization checks."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Analytics.tsx",
+          "operation": "modify",
+          "description": "Add a delete icon button (Trash2 from Lucide) to each stress log entry in the daily breakdown list. When clicked, display an inline confirmation prompt ('Are you sure?') using an AlertDialog or simple confirm pattern. On confirmation, call the useDeleteStressReading mutation with the reading's ID, invalidate the stress readings query cache, and remove the entry from the UI optimistically. Handle error cases with a toast notification."
+        },
+        {
+          "path": "frontend/src/pages/Journal.tsx",
+          "operation": "modify",
+          "description": "Add a delete icon button (Trash2 from Lucide) to each mood journal entry in the past entries list. When clicked, display an inline confirmation prompt ('Are you sure?'). On confirmation, call the useDeleteMoodEntry mutation with the entry's ID, invalidate the mood entries query cache, and remove the entry from the UI optimistically. Handle error cases with a toast notification."
+        },
+        {
+          "path": "frontend/src/pages/Privacy.tsx",
+          "operation": "modify",
+          "description": "Add a 'Manage My Data' section to the Privacy Dashboard with two destructive action buttons: 'Clear Analytics History' and 'Reset Device Data'. Each button should display an inline confirmation dialog before executing. 'Clear Analytics History' calls the useClearAnalyticsHistory mutation and invalidates the stress readings cache. 'Reset Device Data' calls the useClearDevicePairings mutation and invalidates the device pairings cache. Both buttons should be styled with destructive/warning colors and show success toasts on completion."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Enhance data export feature with JSON, CSV, and PDF format options",
+      "acceptanceCriteria": [
+        "Settings page export section shows a format selector with JSON, CSV, and PDF options.",
+        "Selecting JSON and clicking download triggers the existing JSON export, producing a timestamped `.json` file.",
+        "Selecting CSV and clicking download produces a `.csv` file with columns: date, stressScore, heartRate, skinTemp, motion.",
+        "Selecting PDF and clicking download produces a `.pdf` file (or a `.html` print-ready file) with a structured summary report including user name, total sessions, average stress score, and a readable 7-day data table.",
+        "`frontend/src/utils/dataExport.ts` exports `exportAsCSV` and `exportAsPDF` functions.",
+        "All downloads use a timestamped filename pattern (e.g., `tranquil-export-2024-01-15.csv`)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/utils/dataExport.ts",
+          "operation": "modify",
+          "description": "Add two new export utility functions: `exportAsCSV(data: UserDataView, filename: string)` that converts stress readings into a flat CSV with columns (date, stressScore, heartRate, skinTemp, motion) and triggers a browser download; and `exportAsPDF(data: UserDataView, profile: UserProfile, filename: string)` that generates a structured HTML-based summary report (or uses a library like jsPDF) including user name, avatar, total sessions, average stress score, mood trend, and a 7-day stress data table, then triggers download as a PDF or print-ready HTML file. Both functions should use timestamped filenames following the pattern `tranquil-export-YYYY-MM-DD.<ext>`."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Add a format selector (RadioGroup or SegmentedControl with options: JSON, CSV, PDF) above the existing data export download button. Update the download button's click handler to call the appropriate export function based on the selected format: `exportUserData` for JSON, `exportAsCSV` for CSV, or `exportAsPDF` for PDF. Ensure the user data and profile are fetched via the existing useGetUserData query before triggering the export."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add GDPR/compliance UI layer with Terms & Conditions acceptance modal and Privacy Policy links",
+      "acceptanceCriteria": [
+        "First-time users see a T&C / Privacy Policy acceptance modal before the profile setup modal.",
+        "The 'Continue' button on the acceptance modal is disabled until the acceptance checkbox is checked.",
+        "Accepting the T&C calls a backend function that records `termsAcceptedAt` timestamp on the user profile.",
+        "Users who have already accepted are not shown the modal again on subsequent logins.",
+        "Settings page footer contains 'Privacy Policy' and 'Terms & Conditions' links that open a read-only modal.",
+        "Privacy Dashboard includes a 'Data Usage Explanation' section with plain-language descriptions of data collection, purpose, and retention period.",
+        "`UserProfile` in `backend/main.mo` includes a `termsAcceptedAt: ?Int` field and a `recordTermsAcceptance()` function."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/TermsAcceptanceModal.tsx",
+          "operation": "create",
+          "description": "Create a modal component for first-time Terms & Conditions and Privacy Policy acceptance. Display a scrollable summary of data practices, a checkbox labeled 'I accept the Terms & Conditions and Privacy Policy', and a 'Continue' button that remains disabled until the checkbox is checked. On Continue, call the useRecordTermsAcceptance mutation hook to record the timestamp in the backend user profile, then close the modal. Use the Dialog component from shadcn/ui. Style consistently with TRANQUIL design system."
+        },
+        {
+          "path": "frontend/src/components/PolicyModal.tsx",
+          "operation": "create",
+          "description": "Create a read-only modal component for displaying full Privacy Policy or Terms & Conditions text. Accept a `type` prop ('privacy' | 'terms') to determine which policy to display. Use the Dialog component from shadcn/ui with scrollable content and a close button. Style consistently with TRANQUIL design system."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update the AuthGuard to check whether the user has accepted terms using the useGetUserPrivacyPreferences query (checking for termsAcceptedAt field). If authenticated but termsAcceptedAt is null, render the TermsAcceptanceModal before showing the ProfileSetupModal. Ensure proper sequencing: login → terms acceptance → profile setup → app access."
+        },
+        {
+          "path": "frontend/src/pages/Settings.tsx",
+          "operation": "modify",
+          "description": "Add a footer section to the Settings page with links for 'Privacy Policy' and 'Terms & Conditions'. Each link should open the PolicyModal component with the appropriate type prop. Style the links as subtle text links with hover states."
+        },
+        {
+          "path": "frontend/src/pages/Privacy.tsx",
+          "operation": "modify",
+          "description": "Ensure the Privacy Dashboard includes a 'Data Usage Explanation' section (if not already added in REQ-3) with plain-language descriptions of what data is collected (stress readings, mood entries, sleep data, breathing sessions, device pairings), why it is used (personalized wellness insights, trend analysis), and how long it is retained (indefinitely until user deletion or account removal). Style as an informational card or section with readable typography."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Update React Query hooks to include all new privacy and deletion mutations and queries",
+      "acceptanceCriteria": [
+        "All listed mutation hooks exist and are exported from `useQueries.ts`.",
+        "Each mutation hook calls the corresponding backend actor method.",
+        "On success, each mutation invalidates the appropriate React Query cache keys (e.g., `['userProfile']`, `['stressReadings']`, `['moodEntries']`).",
+        "`useGetUserPrivacyPreferences` returns `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile query.",
+        "TypeScript types are correctly inferred with no `any` casts."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add the following new mutation hooks: `useRequestAccountDeletion`, `useCancelAccountDeletion`, `useDeleteStressReading`, `useDeleteMoodEntry`, `useClearAnalyticsHistory`, `useAddDevicePairing`, `useRemoveDevicePairing`, `useClearDevicePairings`, `useUpdatePrivacyPreferences`, `useRecordTermsAcceptance`. Each mutation should call the corresponding backend actor method and invalidate relevant query cache keys on success (['userProfile'], ['stressReadings'], ['moodEntries'], ['userData'], etc.). Add a new query hook `useGetUserPrivacyPreferences` that reads `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile query (this can be derived from the existing `useGetCallerUserProfile` query or be a separate focused query). Ensure proper TypeScript typing throughout with no `any` casts."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Apply cohesive visual upgrade with gradients, glassmorphism, glow effects, and animations",
+      "acceptanceCriteria": [
+        "Dashboard hero section displays a teal-to-indigo gradient background.",
+        "Card components use a frosted-glass / glassmorphism surface style with backdrop-blur.",
+        "Stress gauge and breathing circle have a soft ambient glow effect.",
+        "Page transitions include a fade-in + slide-up entrance animation.",
+        "All interactive elements (buttons, tiles, toggles) have visible hover and active press states.",
+        "New accent color tokens (teal, sage, gold) are defined as OKLCH CSS variables in `frontend/src/index.css`.",
+        "Visual consistency is maintained across light mode, dark mode, mobile, tablet, and desktop viewports."
       ],
       "file_operations": [
         {
           "path": "frontend/src/index.css",
           "operation": "modify",
-          "description": "Review and consolidate all color token definitions to ensure they are consistently defined for both light and dark modes without breakpoint-specific overrides. Verify that all OKLCH color values, chart colors, stress-level colors, and background tokens are properly scoped to :root and .dark selectors only. Remove any media query blocks that redefine color tokens for specific screen sizes. Ensure all custom properties are applied uniformly across all viewports."
-        },
-        {
-          "path": "frontend/index.css",
-          "operation": "modify",
-          "description": "Audit and remove any responsive color overrides or breakpoint-specific theme customizations. Ensure that all CSS custom properties for the design token system (colors, radius, chart colors, sidebar) are defined once and applied consistently at all screen sizes. Consolidate any duplicate color definitions between this file and frontend/src/index.css to maintain a single source of truth."
-        },
-        {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Review the Header component and ensure that all background colors, text colors, and border colors use the design token CSS custom properties (e.g., bg-background, text-foreground, border-border) without any breakpoint-specific color classes. Verify that the sticky positioning and color scheme remain consistent across mobile, tablet, and desktop viewports."
-        },
-        {
-          "path": "frontend/src/components/BottomNav.tsx",
-          "operation": "modify",
-          "description": "Ensure the BottomNav component uses consistent color tokens from the design system (background, foreground, accent, muted) without any responsive color overrides. Verify that active route highlighting uses the same accent color at all screen sizes. Confirm that the fixed positioning and color scheme remain uniform across all viewports."
-        },
-        {
-          "path": "frontend/src/components/StressGauge.tsx",
-          "operation": "modify",
-          "description": "Review the StressGauge component and ensure that the color-coded styling for low/medium/high stress levels uses the same color tokens (stress-low, stress-medium, stress-high) at all breakpoints. Verify that the glow effect and SVG colors are applied uniformly across mobile, tablet, and desktop. Remove any viewport-specific color logic."
-        },
-        {
-          "path": "frontend/src/components/StressChart.tsx",
-          "operation": "modify",
-          "description": "Ensure the Recharts bar chart uses the same chart color tokens (chart-1, chart-2, chart-3, chart-4, chart-5) and stress-level colors at all screen sizes. Verify that the color-coded bars for low, medium, and high stress levels remain consistent across all viewports. Remove any breakpoint-specific fill or stroke color overrides."
-        },
-        {
-          "path": "frontend/src/components/TipCard.tsx",
-          "operation": "modify",
-          "description": "Review the TipCard component and ensure that the category-specific color accents and badge colors use consistent design tokens without responsive overrides. Verify that background colors, text colors, and borders are applied uniformly across all screen sizes."
-        },
-        {
-          "path": "frontend/src/components/SoundTile.tsx",
-          "operation": "modify",
-          "description": "Ensure the SoundTile component uses consistent background, text, and accent colors from the design system at all breakpoints. Verify that the animated sound wave indicator and hover states use the same color tokens across mobile, tablet, and desktop. Remove any viewport-specific color classes."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Audit the Dashboard page and ensure that all background colors, card colors, text colors, gradient colors, and accent colors use the design token system consistently at all screen sizes. Verify that the live stress gauge, quick action buttons, and greeting section maintain the same color scheme across mobile, tablet, and desktop viewports."
-        },
-        {
-          "path": "frontend/src/pages/Breathe.tsx",
-          "operation": "modify",
-          "description": "Review the Breathe page and ensure that all background colors, button colors, and text colors are applied uniformly across all breakpoints. Verify that the animated breathing timer and technique selection UI maintain consistent colors at all screen sizes."
-        },
-        {
-          "path": "frontend/src/pages/Sounds.tsx",
-          "operation": "modify",
-          "description": "Ensure the Sounds page uses consistent background, card, and accent colors at all screen sizes. Verify that the sound tile grid and local music upload section maintain the same color scheme across mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/Journal.tsx",
-          "operation": "modify",
-          "description": "Review the Journal page and ensure that mood selector colors, card backgrounds, text colors, and button colors are applied uniformly across all viewports. Verify that the mood entry list maintains consistent color styling at all screen sizes."
-        },
-        {
-          "path": "frontend/src/pages/Analytics.tsx",
-          "operation": "modify",
-          "description": "Ensure the Analytics page uses consistent colors for summary cards, chart backgrounds, text, and stress-level indicators at all breakpoints. Verify that the 7-day stress chart and improvement trend message maintain the same color scheme across mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/Profile.tsx",
-          "operation": "modify",
-          "description": "Review the Profile page and ensure that avatar colors, background colors, card colors, and button colors are applied uniformly at all screen sizes. Verify that the profile stats section maintains consistent color styling across all viewports."
-        },
-        {
-          "path": "frontend/src/pages/Settings.tsx",
-          "operation": "modify",
-          "description": "Ensure the Settings page uses consistent background, card, toggle, and button colors at all breakpoints. Verify that the theme toggle, reminder toggles, and data export button maintain the same color scheme across mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/SleepTracking.tsx",
-          "operation": "modify",
-          "description": "Review the SleepTracking page and ensure that form colors, input colors, button colors, quality label colors, and card backgrounds are applied uniformly across all screen sizes. Verify that the sleep entry list maintains consistent color styling at all viewports."
-        },
-        {
-          "path": "frontend/src/pages/VibrationControl.tsx",
-          "operation": "modify",
-          "description": "Ensure the VibrationControl page uses consistent background, button, slider, and text colors at all breakpoints. Verify that the pattern selection and intensity controls maintain the same color scheme across mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/TipsAndReminders.tsx",
-          "operation": "modify",
-          "description": "Review the TipsAndReminders page and ensure that tip card colors, toggle colors, and background colors are applied uniformly across all screen sizes. Verify that the wellness tips and reminder settings maintain consistent color styling at all viewports."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Make the app fully responsive across all screen sizes (mobile 320px+, tablet 768px+, desktop 1024px+) with adaptive layouts, grids, charts, and navigation elements",
-      "acceptanceCriteria": [
-        "No horizontal scrollbar or overflow on any page at any standard viewport width",
-        "Grid layouts (e.g., sound tiles, stats cards) reflow correctly from 1-column mobile to 2–3 column desktop",
-        "StressChart, StressGauge, and all Recharts visualizations resize fluidly without clipping",
-        "Header and BottomNav are correctly positioned and sized on mobile, tablet, and desktop",
-        "Typography scales appropriately across breakpoints using Tailwind responsive classes",
-        "All forms, sliders, and modals (e.g., ProfileSetupModal) are usable and correctly sized on all screen widths",
-        "EmergencyCalmOverlay fills the screen correctly on all device sizes"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Layout.tsx",
-          "operation": "modify",
-          "description": "Review the Layout component and ensure that the max-width container, Header, Outlet, and BottomNav are correctly positioned and sized across all screen sizes. Add responsive padding classes (e.g., px-4 sm:px-6 lg:px-8) to ensure proper spacing on mobile, tablet, and desktop. Verify that the scrollable main content area adapts gracefully to all viewports without overflow."
-        },
-        {
-          "path": "frontend/src/components/Header.tsx",
-          "operation": "modify",
-          "description": "Ensure the Header component is fully responsive with proper spacing and sizing across all screen sizes. Use Tailwind responsive classes for padding, height, and font sizes (e.g., h-14 sm:h-16 lg:h-20, text-sm sm:text-base lg:text-lg). Verify that the logo, tips button, avatar, and settings button are correctly positioned and sized on mobile (320px+), tablet (768px+), and desktop (1024px+) viewports without overflow."
-        },
-        {
-          "path": "frontend/src/components/BottomNav.tsx",
-          "operation": "modify",
-          "description": "Review the BottomNav component and ensure it is correctly positioned and sized on mobile and tablet viewports. Add responsive padding and icon sizing classes (e.g., py-2 sm:py-3, text-base sm:text-lg). Verify that all five route links are evenly spaced and usable at all screen widths. Consider hiding the BottomNav on desktop (lg:hidden) if a sidebar or top navigation is introduced."
-        },
-        {
-          "path": "frontend/src/components/StressGauge.tsx",
-          "operation": "modify",
-          "description": "Ensure the StressGauge SVG component resizes fluidly across all screen sizes without clipping. Use responsive viewBox scaling and container sizing (e.g., w-full max-w-xs sm:max-w-sm lg:max-w-md mx-auto) to maintain proper proportions. Verify that text elements within the SVG scale appropriately and remain readable on mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/components/StressChart.tsx",
-          "operation": "modify",
-          "description": "Review the Recharts bar chart component and ensure it resizes fluidly without clipping at all viewport widths. Use responsive container sizing and ResponsiveContainer from Recharts with percentage-based dimensions. Adjust axis labels, tick fonts, and bar widths to scale appropriately on mobile (single-column), tablet (2-column), and desktop (3-column) layouts. Verify that the chart remains usable and readable at 320px+ width."
-        },
-        {
-          "path": "frontend/src/components/BreathingCircle.tsx",
-          "operation": "modify",
-          "description": "Ensure the animated breathing circle scales and positions correctly on all screen sizes. Use responsive sizing classes (e.g., w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48) to adapt the circle size across mobile, tablet, and desktop. Verify that the animation and color transitions remain smooth at all breakpoints."
-        },
-        {
-          "path": "frontend/src/components/ProfileStats.tsx",
-          "operation": "modify",
-          "description": "Review the three-column stat grid and ensure it reflows correctly from a single column on mobile to two or three columns on tablet and desktop. Use responsive grid classes (e.g., grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4). Verify that stat cards are properly sized and spaced at all viewport widths without overflow."
-        },
-        {
-          "path": "frontend/src/components/MoodSelector.tsx",
-          "operation": "modify",
-          "description": "Ensure the mood button row is fully responsive and usable on mobile, tablet, and desktop. Use responsive sizing and spacing classes for buttons (e.g., gap-2 sm:gap-3 lg:gap-4, text-sm sm:text-base lg:text-lg). Verify that all five mood buttons fit within the viewport at 320px+ width without requiring horizontal scrolling."
-        },
-        {
-          "path": "frontend/src/components/SoundTile.tsx",
-          "operation": "modify",
-          "description": "Review the SoundTile component and ensure it scales correctly within responsive grid layouts. Use responsive padding, sizing, and typography classes (e.g., p-3 sm:p-4 lg:p-6, text-sm sm:text-base lg:text-lg). Verify that the tile remains usable and visually consistent across all screen sizes."
-        },
-        {
-          "path": "frontend/src/components/TipCard.tsx",
-          "operation": "modify",
-          "description": "Ensure the TipCard component is fully responsive with proper padding, typography, and layout across all screen sizes. Use responsive classes (e.g., p-4 sm:p-5 lg:p-6, text-sm sm:text-base lg:text-lg). Verify that the card adapts gracefully within single-column mobile and multi-column desktop layouts without overflow."
-        },
-        {
-          "path": "frontend/src/components/ProfileSetupModal.tsx",
-          "operation": "modify",
-          "description": "Review the ProfileSetupModal and ensure it is correctly sized and usable on mobile, tablet, and desktop. Use responsive modal sizing classes (e.g., max-w-sm sm:max-w-md lg:max-w-lg). Verify that the avatar selector grid and name input field are properly sized and spaced at all viewport widths. Ensure the modal content does not overflow or clip on small screens (320px+)."
-        },
-        {
-          "path": "frontend/src/components/EmergencyCalmOverlay.tsx",
-          "operation": "modify",
-          "description": "Ensure the EmergencyCalmOverlay fills the screen correctly on all device sizes without overflow or clipping. Use fixed positioning with full viewport dimensions (fixed inset-0 w-screen h-screen). Verify that the breathing, body scan, and affirmation phases are properly sized and readable on mobile, tablet, and desktop. Use responsive typography classes for phase instructions (e.g., text-lg sm:text-xl lg:text-2xl)."
-        },
-        {
-          "path": "frontend/src/components/IntensitySlider.tsx",
-          "operation": "modify",
-          "description": "Review the IntensitySlider component and ensure it is fully responsive with proper sizing and spacing across all screen sizes. Use responsive padding, label sizing, and indicator spacing classes (e.g., px-2 sm:px-4 lg:px-6, text-sm sm:text-base lg:text-lg). Verify that the slider and dot indicators remain usable on mobile (320px+) and scale appropriately on larger screens."
-        },
-        {
-          "path": "frontend/src/components/StarRating.tsx",
-          "operation": "modify",
-          "description": "Ensure the StarRating component is fully responsive with proper star sizing and spacing across all screen sizes. Use responsive icon size classes (e.g., w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8, gap-1 sm:gap-2). Verify that all five stars are visible and usable on mobile (320px+) without overflow."
-        },
-        {
-          "path": "frontend/src/components/AvatarSelector.tsx",
-          "operation": "modify",
-          "description": "Review the avatar grid and ensure it reflows correctly from a single column on mobile to multiple columns on tablet and desktop. Use responsive grid classes (e.g., grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4). Verify that all six avatar options are properly sized and spaced at all viewport widths."
-        },
-        {
-          "path": "frontend/src/components/ReminderToggle.tsx",
-          "operation": "modify",
-          "description": "Ensure the ReminderToggle row component is fully responsive with proper spacing and sizing across all screen sizes. Use responsive padding and typography classes (e.g., py-3 sm:py-4 lg:py-5, text-sm sm:text-base lg:text-lg). Verify that the emoji, label, and toggle switch are correctly positioned and usable on mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/Dashboard.tsx",
-          "operation": "modify",
-          "description": "Review the Dashboard page and ensure all layouts, grids, and components are fully responsive. Use responsive grid and spacing classes for the greeting, stress gauge, sensor data, and quick action buttons (e.g., grid-cols-1 sm:grid-cols-2 lg:grid-cols-3, gap-4 sm:gap-6 lg:gap-8). Verify that the page adapts gracefully from single-column mobile (320px+) to multi-column desktop (1024px+) without overflow. Ensure typography scales appropriately (e.g., text-2xl sm:text-3xl lg:text-4xl for headings)."
-        },
-        {
-          "path": "frontend/src/pages/Breathe.tsx",
-          "operation": "modify",
-          "description": "Ensure the Breathe page layout is fully responsive with proper spacing and sizing for the technique selector, breathing timer, and action buttons. Use responsive padding, grid, and typography classes (e.g., px-4 sm:px-6 lg:px-8, text-lg sm:text-xl lg:text-2xl). Verify that the page content fits within the viewport at all screen sizes without horizontal scrolling."
-        },
-        {
-          "path": "frontend/src/pages/Sounds.tsx",
-          "operation": "modify",
-          "description": "Review the Sounds page and ensure the sound tile grid reflows correctly from a single column on mobile to 2–3 columns on tablet and desktop. Use responsive grid classes (e.g., grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6). Verify that the local music upload section is properly sized and spaced at all viewport widths. Ensure no overflow or clipping occurs at 320px+ width."
-        },
-        {
-          "path": "frontend/src/pages/Journal.tsx",
-          "operation": "modify",
-          "description": "Ensure the Journal page is fully responsive with proper spacing and sizing for the mood selector, note input, submit button, and mood entry list. Use responsive padding, grid, and typography classes (e.g., px-4 sm:px-6 lg:px-8, text-base sm:text-lg lg:text-xl). Verify that the page adapts gracefully across all screen sizes without overflow. Ensure the mood entry list cards reflow correctly on mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/Analytics.tsx",
-          "operation": "modify",
-          "description": "Review the Analytics page and ensure the summary cards grid reflows correctly from a single column on mobile to 2–3 columns on tablet and desktop. Use responsive grid classes (e.g., grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6). Verify that the 7-day stress chart resizes fluidly without clipping at all viewport widths. Ensure the improvement trend message and per-day breakdown are properly sized and spaced on mobile, tablet, and desktop."
-        },
-        {
-          "path": "frontend/src/pages/Profile.tsx",
-          "operation": "modify",
-          "description": "Ensure the Profile page is fully responsive with proper spacing and sizing for the avatar, name editor, profile stats, and logout button. Use responsive padding, grid, and typography classes (e.g., px-4 sm:px-6 lg:px-8, text-lg sm:text-xl lg:text-2xl). Verify that the profile stats grid reflows correctly from single-column mobile to multi-column desktop. Ensure no overflow or clipping occurs at all screen sizes."
-        },
-        {
-          "path": "frontend/src/pages/Settings.tsx",
-          "operation": "modify",
-          "description": "Review the Settings page and ensure the theme toggle, reminder toggles, and data export button are fully responsive. Use responsive padding, spacing, and typography classes (e.g., px-4 sm:px-6 lg:px-8, text-base sm:text-lg lg:text-xl). Verify that all form elements and buttons are properly sized and usable on mobile (320px+), tablet (768px+), and desktop (1024px+) without overflow."
-        },
-        {
-          "path": "frontend/src/pages/SleepTracking.tsx",
-          "operation": "modify",
-          "description": "Ensure the SleepTracking page is fully responsive with proper spacing and sizing for the time inputs, quality rating, submit button, and sleep entry list. Use responsive padding, grid, and typography classes (e.g., px-4 sm:px-6 lg:px-8, text-base sm:text-lg lg:text-xl). Verify that the form fields are properly sized on mobile and that the sleep entry list cards reflow correctly on tablet and desktop. Ensure no overflow or clipping occurs at all screen sizes."
-        },
-        {
-          "path": "frontend/src/pages/VibrationControl.tsx",
-          "operation": "modify",
-          "description": "Review the VibrationControl page and ensure the pattern selection, intensity slider, and submit button are fully responsive. Use responsive padding, spacing, and typography classes (e.g., px-4 sm:px-6 lg:px-8, text-base sm:text-lg lg:text-xl). Verify that all form elements are properly sized and usable on mobile, tablet, and desktop without overflow."
-        },
-        {
-          "path": "frontend/src/pages/TipsAndReminders.tsx",
-          "operation": "modify",
-          "description": "Ensure the TipsAndReminders page is fully responsive with proper spacing and sizing for the tip cards grid and reminder toggles. Use responsive grid classes for tip cards (e.g., grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6). Verify that the page adapts gracefully from single-column mobile to multi-column desktop without overflow. Ensure reminder toggle rows are properly sized and spaced at all viewport widths."
+          "description": "Add new OKLCH CSS custom property tokens for jewel-tone accent colors (teal, sage green, soft gold) in both light and dark theme blocks. Define gradient variables for teal-to-indigo backgrounds. Add utility classes or update existing tokens for glassmorphism card surfaces (backdrop-blur, semi-transparent backgrounds). Ensure all new color tokens follow the existing OKLCH variable structure and are theme-aware (light/dark variants)."
         },
         {
           "path": "frontend/tailwind.config.js",
           "operation": "modify",
-          "description": "Review the Tailwind configuration and ensure that all custom breakpoints, font sizes, spacing scales, and container settings support responsive layouts across mobile (320px+), tablet (768px+), and desktop (1024px+) viewports. Verify that the typography plugin and container-queries plugin are correctly configured to support fluid scaling and responsive typography. Add or adjust responsive utility classes as needed to support the implementation of fully responsive layouts throughout the app."
+          "description": "Extend the Tailwind theme configuration to include the new jewel-tone accent colors (teal, sage, gold) as custom color utilities. Add animation keyframes for fade-in and slide-up entrance animations. Define backdrop-blur utility classes if not already present. Ensure all extensions are compatible with existing TRANQUIL design system tokens."
         },
         {
-          "path": "frontend/src/components/LoginScreen.tsx",
+          "path": "frontend/src/pages/Dashboard.tsx",
           "operation": "modify",
-          "description": "Ensure the LoginScreen is fully responsive with proper padding, typography, and button sizing across all screen sizes. Use responsive classes (e.g., px-4 sm:px-6 lg:px-8, text-lg sm:text-xl lg:text-2xl) for the app features list and 'Get Started' button. Verify that the full-screen layout adapts gracefully on mobile, tablet, and desktop without overflow."
+          "description": "Update the Dashboard hero section to use a teal-to-indigo gradient background (using the new CSS variables or Tailwind gradient utilities). Apply the gradient as a background overlay or container background. Ensure the greeting and stress gauge remain visually prominent against the gradient. Verify responsiveness and theme consistency."
+        },
+        {
+          "path": "frontend/src/components/StressGauge.tsx",
+          "operation": "modify",
+          "description": "Add a soft ambient glow effect to the stress gauge SVG using CSS filters (drop-shadow or box-shadow with blur and color matching the stress level). Apply glow dynamically based on the current stress level (low/medium/high). Ensure the glow is subtle and enhances visual appeal without overwhelming the gauge display."
+        },
+        {
+          "path": "frontend/src/components/BreathingCircle.tsx",
+          "operation": "modify",
+          "description": "Add a soft ambient glow effect to the breathing circle element using CSS filters or radial gradient overlays. Apply the glow during the inhale/exhale phases to enhance the calming visual. Ensure the animation remains smooth and the glow effect is theme-aware."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add global CSS classes or animations for page entrance effects (fade-in + slide-up) on route transitions. Apply these animations to the main content Outlet wrapper or individual page containers. Use Tailwind's animate utilities or CSS @keyframes. Ensure animations are subtle, fast (200-300ms), and do not interfere with navigation or accessibility."
+        },
+        {
+          "path": "frontend/src/components/ui/button.tsx",
+          "operation": "modify",
+          "description": "Enhance all button variants with visible hover and active press states using scale transforms, brightness adjustments, or shadow changes. Ensure transitions are smooth (150-200ms) and apply consistently across all button sizes and variants. Verify accessibility (focus states remain visible)."
+        },
+        {
+          "path": "frontend/src/components/ui/card.tsx",
+          "operation": "modify",
+          "description": "Update Card component styles to use glassmorphism surface styling: semi-transparent backgrounds using the new CSS variables, backdrop-blur utility classes, and subtle borders. Ensure the frosted-glass effect works in both light and dark themes and remains readable over gradient backgrounds."
         }
       ]
     }

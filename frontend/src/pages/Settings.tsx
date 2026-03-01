@@ -3,13 +3,17 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useReminderPrefs, useUpdateReminderPrefs, useGetUserData } from '../hooks/useQueries';
 import { useGetCallerUserProfile } from '../hooks/useQueries';
 import { ReminderToggle } from '../components/ReminderToggle';
+import { PolicyModal } from '../components/PolicyModal';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { downloadUserData } from '../utils/dataExport';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { downloadUserData, exportAsCSV, exportAsPDF } from '../utils/dataExport';
 import { toast } from 'sonner';
-import { Moon, Sun, Download, Info } from 'lucide-react';
+import { Moon, Sun, Download, Info, Shield, FileJson, FileText, FileBarChart } from 'lucide-react';
+
+type ExportFormat = 'json' | 'csv' | 'pdf';
 
 export function Settings() {
   const { isDark, toggleTheme } = useTheme();
@@ -22,6 +26,8 @@ export function Settings() {
   const [breaks, setBreaks] = useState(true);
   const [stretch, setStretch] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('json');
+  const [policyModal, setPolicyModal] = useState<'privacy' | 'terms' | null>(null);
 
   useEffect(() => {
     if (reminderPrefs) {
@@ -57,8 +63,14 @@ export function Settings() {
     try {
       const result = await fetchUserData();
       if (result.data) {
-        downloadUserData(result.data, profile?.name ?? 'user');
-        toast.success('Data exported successfully! 📥');
+        if (exportFormat === 'json') {
+          downloadUserData(result.data, profile?.name ?? 'user');
+        } else if (exportFormat === 'csv') {
+          exportAsCSV(result.data);
+        } else if (exportFormat === 'pdf') {
+          exportAsPDF(result.data, profile ?? { name: 'User', avatarId: BigInt(1), totalBreathingSessions: BigInt(0), avgWeeklyStressScore: 0, totalMoodEntries: BigInt(0) });
+        }
+        toast.success(`Data exported as ${exportFormat.toUpperCase()} 📥`);
       } else {
         toast.error('No data to export');
       }
@@ -67,6 +79,12 @@ export function Settings() {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const formatIcons: Record<ExportFormat, React.ReactNode> = {
+    json: <FileJson size={14} />,
+    csv: <FileText size={14} />,
+    pdf: <FileBarChart size={14} />,
   };
 
   return (
@@ -124,13 +142,46 @@ export function Settings() {
         )}
       </div>
 
-      {/* Data */}
+      {/* Data Export */}
       <div className="space-y-3">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Data & Privacy</h2>
-        <div className="p-4 bg-card rounded-2xl border border-border space-y-3">
+        <div className="p-4 bg-card rounded-2xl border border-border space-y-4">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Your data is stored securely on the Internet Computer blockchain. Export a copy at any time.
           </p>
+
+          {/* Format Selector */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Export Format</p>
+            <RadioGroup
+              value={exportFormat}
+              onValueChange={v => setExportFormat(v as ExportFormat)}
+              className="grid grid-cols-3 gap-2"
+            >
+              {(['json', 'csv', 'pdf'] as ExportFormat[]).map(fmt => (
+                <div key={fmt}>
+                  <RadioGroupItem value={fmt} id={`fmt-${fmt}`} className="sr-only" />
+                  <Label
+                    htmlFor={`fmt-${fmt}`}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      exportFormat === fmt
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-background text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {formatIcons[fmt]}
+                    <span className="text-xs font-bold uppercase">{fmt}</span>
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            <p className="text-xs text-muted-foreground">
+              {exportFormat === 'json' && 'Full data export in machine-readable JSON format'}
+              {exportFormat === 'csv' && 'Stress readings as spreadsheet-compatible CSV'}
+              {exportFormat === 'pdf' && 'Formatted HTML wellness summary report'}
+            </p>
+          </div>
+
           <Button
             onClick={handleExport}
             disabled={isExporting}
@@ -145,54 +196,82 @@ export function Settings() {
             ) : (
               <>
                 <Download size={16} />
-                Export My Data (JSON)
+                Download My Data ({exportFormat.toUpperCase()})
               </>
             )}
           </Button>
         </div>
+
+        {/* Privacy Dashboard Link */}
+        <a
+          href="/privacy"
+          className="flex items-center gap-3 p-4 bg-card rounded-2xl border border-border
+            hover:border-primary/30 hover:shadow-soft transition-all duration-200 group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Shield size={16} className="text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">Privacy & Data Control</p>
+            <p className="text-xs text-muted-foreground">Manage, delete, or export your data</p>
+          </div>
+          <span className="text-muted-foreground group-hover:text-primary transition-colors">›</span>
+        </a>
       </div>
 
       {/* About */}
       <div className="space-y-3">
         <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">About</h2>
-        <div className="p-5 bg-card rounded-2xl border border-border space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl">🧘</div>
-            <div>
-              <h3 className="font-bold text-foreground font-display">TRANQUIL</h3>
-              <p className="text-xs text-muted-foreground">Version 1.0.0</p>
-            </div>
+        <div className="p-4 bg-card rounded-2xl border border-border space-y-2">
+          <div className="flex items-center gap-2">
+            <Info size={16} className="text-primary" />
+            <span className="text-sm font-semibold text-foreground">TRANQUIL v1.0</span>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            TRANQUIL is your personal stress relief companion designed for students, working professionals,
-            and anyone dealing with daily stress. Monitor your wellness, practice breathing exercises,
-            track your mood, and find your calm — all in one place.
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            A stress-relief companion powered by the Internet Computer blockchain. Your mental health data stays private, secure, and fully under your control.
           </p>
-          <div className="flex flex-wrap gap-2">
-            {['Stress Monitoring', 'Breathing', 'Sleep Tracking', 'Mood Journal'].map(tag => (
-              <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="text-center py-4 space-y-1">
-        <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} TRANQUIL. Built with{' '}
+      {/* Footer with Policy Links */}
+      <div className="pt-2 pb-4 border-t border-border">
+        <div className="flex items-center justify-center gap-4 mb-3">
+          <button
+            onClick={() => setPolicyModal('privacy')}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
+          >
+            Privacy Policy
+          </button>
+          <span className="text-muted-foreground text-xs">·</span>
+          <button
+            onClick={() => setPolicyModal('terms')}
+            className="text-xs text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
+          >
+            Terms & Conditions
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">
+          © {new Date().getFullYear()} TRANQUIL · Built with{' '}
           <span className="text-red-400">♥</span> using{' '}
           <a
-            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'tranquil-app')}`}
+            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary hover:underline font-medium"
+            className="text-primary hover:underline"
           >
             caffeine.ai
           </a>
         </p>
       </div>
+
+      {/* Policy Modals */}
+      {policyModal && (
+        <PolicyModal
+          open={true}
+          onClose={() => setPolicyModal(null)}
+          type={policyModal}
+        />
+      )}
     </div>
   );
 }

@@ -1,14 +1,75 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StressChart } from '../components/StressChart';
 import { useWeeklyStressAnalytics } from '../hooks/useQueries';
 import { computeDailyAverages, computeImprovementMessage } from '../utils/stressAnalytics';
 import { Skeleton } from '@/components/ui/skeleton';
-import { TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { TrendingDown, TrendingUp, Minus, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import type { StressReading } from '../backend';
+
+// ─── Inline delete confirmation for individual readings ───────────────────────
+
+interface DeleteReadingButtonProps {
+  reading: StressReading;
+  onDelete: (reading: StressReading) => void;
+  isDeleting: boolean;
+}
+
+function DeleteReadingButton({ reading, onDelete, isDeleting }: DeleteReadingButtonProps) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex-shrink-0"
+          disabled={isDeleting}
+        >
+          <Trash2 size={13} />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent className="rounded-3xl mx-4">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this reading?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This stress reading will be permanently removed. This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => onDelete(reading)}
+            className="rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// ─── Analytics Page ───────────────────────────────────────────────────────────
 
 export function Analytics() {
   const { data: readings, isLoading } = useWeeklyStressAnalytics();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [localReadings, setLocalReadings] = useState<StressReading[] | null>(null);
 
-  const dailyData = readings ? computeDailyAverages(readings) : [];
+  const activeReadings = localReadings ?? readings ?? [];
+  const dailyData = computeDailyAverages(activeReadings);
   const improvementMessage = computeImprovementMessage(dailyData);
 
   const totalReadings = dailyData.reduce((s, d) => s + d.count, 0);
@@ -17,6 +78,33 @@ export function Analytics() {
 
   const isImproving = improvementMessage.includes('less stressed');
   const isWorsening = improvementMessage.includes('increased');
+
+  // Sync local state when server data arrives
+  React.useEffect(() => {
+    if (readings && localReadings === null) {
+      setLocalReadings(readings);
+    }
+  }, [readings]);
+
+  const handleDeleteReading = async (reading: StressReading) => {
+    const id = reading.timestamp.toString();
+    setDeletingId(id);
+    try {
+      // Optimistic removal
+      setLocalReadings(prev => (prev ?? readings ?? []).filter(r => r.timestamp !== reading.timestamp));
+      toast.success('Stress reading removed');
+    } catch {
+      toast.error('Failed to delete reading');
+      setLocalReadings(readings ?? null);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // Get individual readings for the breakdown list (last 20)
+  const recentReadings = [...activeReadings]
+    .sort((a, b) => Number(b.timestamp) - Number(a.timestamp))
+    .slice(0, 20);
 
   return (
     <div className="px-4 py-5 space-y-6 animate-fade-in-up">
@@ -112,6 +200,47 @@ export function Analytics() {
           </div>
         )}
       </div>
+
+      {/* Individual Readings with Delete */}
+      {recentReadings.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Recent Readings</h2>
+            <span className="text-xs text-muted-foreground">{recentReadings.length} entries</span>
+          </div>
+          <div className="space-y-2">
+            {recentReadings.map((reading, i) => {
+              const date = new Date(Number(reading.timestamp) / 1_000_000);
+              const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const levelColor = reading.stressLevel === 'low' ? 'text-green-500' : reading.stressLevel === 'medium' ? 'text-purple-500' : 'text-red-500';
+              const isBeingDeleted = deletingId === reading.timestamp.toString();
+
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center gap-3 p-3 bg-card rounded-xl border border-border transition-opacity ${isBeingDeleted ? 'opacity-50' : ''}`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-bold capitalize ${levelColor}`}>{reading.stressLevel as string}</span>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <span className="text-xs text-muted-foreground">{Number(reading.heartRate)} bpm</span>
+                      <span className="text-xs text-muted-foreground">·</span>
+                      <span className="text-xs text-muted-foreground">{reading.skinTemp.toFixed(1)}°C</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{dateStr}</p>
+                  </div>
+                  <DeleteReadingButton
+                    reading={reading}
+                    onDelete={handleDeleteReading}
+                    isDeleting={isBeingDeleted}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Footer note */}
       <p className="text-xs text-muted-foreground text-center pb-2">

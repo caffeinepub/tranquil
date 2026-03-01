@@ -1,64 +1,213 @@
 {
   "kind": "build_request",
-  "title": "Match mobile UI colors to desktop and improve cross-device responsiveness",
+  "title": "TRANQUIL – Privacy Dashboard, Data Ownership Controls & Secure Deletion",
   "projectName": "TRANQUIL",
-  "priority": "normal",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-1",
-      "text": "Ensure all color tokens, backgrounds, text colors, accent colors, and component styles are consistently applied across all screen sizes (mobile, tablet, desktop) — no visual discrepancies between breakpoints. All pages (Dashboard, Breathe, Sounds, Journal, Analytics, Profile, Settings, Sleep, VibrationControl, TipsAndReminders) must render with identical color themes regardless of viewport width.",
-      "target": "frontend",
+      "id": "REQ-3",
+      "text": "Implement a Privacy Dashboard page (route: /privacy) accessible from the Settings page and the Profile page. The dashboard must display: a stored data summary (counts of stress logs, mood entries, sleep entries, breathing sessions, device pairing records); a plain-language data usage explanation section; toggles for analytics tracking and AI prediction usage (persisted to the backend user profile); a 'Manage Connected Devices' section listing paired devices with individual remove buttons; and a prominently styled red 'Delete Account' button at the bottom. The page must follow the TRANQUIL design system (OKLCH palette, Nunito/Quicksand fonts, dark/light theme support) and be fully responsive from 320 px mobile through desktop.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-recent"
         ],
         "quotes": [
-          "Make it same as in desktop too like colors and responsive"
+          "Create a dedicated Privacy & Data Control section with: View stored data summary, Data usage explanation, Toggle analytics tracking, Toggle AI prediction usage, Manage connected devices, Delete account button (highlighted in red)"
         ]
       },
       "acceptanceCriteria": [
-        "Color tokens defined in frontend/src/index.css and frontend/index.css are applied uniformly at all breakpoints",
-        "Dark and light mode colors match between mobile and desktop viewports on all pages",
-        "No page has a different background, card, or text color on mobile vs desktop",
-        "Gradient, accent, and chart colors are consistent across all screen sizes"
+        "A /privacy route is accessible from Settings and Profile pages.",
+        "Data summary cards show real counts fetched from the backend for stress logs, mood entries, sleep entries, breathing sessions, and paired devices.",
+        "Analytics tracking toggle and AI prediction toggle are rendered as Switch components and their state is persisted to the backend user profile.",
+        "Connected devices section lists stored pairing records; each entry has a 'Remove Device' button that deletes that record from the backend.",
+        "Delete Account button is styled with a red background and the label 'Delete My Account'.",
+        "Page is fully responsive at 320 px, 768 px, and 1024 px+ viewports.",
+        "Dark and light themes render correctly with no visual discrepancies."
       ]
     },
     {
-      "id": "REQ-2",
-      "text": "Make the app fully responsive across all screen sizes (mobile 320px+, tablet 768px+, desktop 1024px+). All layouts, grids, cards, charts, and navigation elements must adapt gracefully. Pages with fixed widths or overflowing content must be corrected. The bottom navigation should remain on mobile/tablet, and a sidebar or top navigation may be introduced for desktop if appropriate.",
-      "target": "frontend",
+      "id": "REQ-4",
+      "text": "Implement a full account deletion flow. In the Privacy Dashboard, when the user clicks 'Delete My Account', display a modal warning with the exact text 'This action is permanent and cannot be undone.' and a secondary message explaining that all data (profile, stress logs, mood journal, sleep data, device pairing history) will be deleted. Require the user to type 'DELETE' to confirm. On confirmation, call a backend function that marks the account for deletion (soft-delete flag with a 30-day grace period timestamp). Immediately clear all locally cached data and log the user out. Display a toast confirming deletion initiation. The entire UI flow must complete within 30 seconds. Add a corresponding backend Motoko function `requestAccountDeletion(userId)` that sets a `pendingDeletion` flag and `deletionScheduledAt` timestamp on the user record.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-recent"
         ],
         "quotes": [
-          "Make it same as in desktop too like colors and responsive"
+          "Allows users to permanently delete their account from Settings.",
+          "Requires password re-authentication before deletion.",
+          "Shows warning confirmation popup.",
+          "Provides a 7-day recovery grace period (optional soft delete).",
+          "Clear warning message: 'This action is permanent and cannot be undone.'",
+          "Data deletion should complete within 30 seconds"
         ]
       },
       "acceptanceCriteria": [
-        "No horizontal scrollbar or overflow on any page at any standard viewport width",
-        "Grid layouts (e.g., sound tiles, stats cards) reflow correctly from 1-column mobile to 2–3 column desktop",
-        "StressChart, StressGauge, and all Recharts visualizations resize fluidly without clipping",
-        "Header and BottomNav are correctly positioned and sized on mobile, tablet, and desktop",
-        "Typography scales appropriately across breakpoints using Tailwind responsive classes",
-        "All forms, sliders, and modals (e.g., ProfileSetupModal) are usable and correctly sized on all screen widths",
-        "EmergencyCalmOverlay fills the screen correctly on all device sizes"
+        "Clicking 'Delete My Account' opens a confirmation modal with the exact warning text.",
+        "The confirm button remains disabled until the user types 'DELETE' in the input field.",
+        "On confirmation, the backend `requestAccountDeletion` function is called and returns success.",
+        "The backend marks the user record with `pendingDeletion = true` and records `deletionScheduledAt` timestamp.",
+        "After confirmation, all React Query caches are cleared and the user is logged out via Internet Identity.",
+        "A success toast 'Your account deletion has been scheduled. You have 30 days to cancel.' is shown before logout.",
+        "The entire flow from button click to logout completes within 30 seconds."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement selective data deletion controls. In the Privacy Dashboard, add a 'Manage My Data' section with the following individual deletion actions: (1) Delete a specific stress log entry — each stress log in the existing list views must have a delete icon that calls the backend `deleteStressReading(id)` function; (2) Delete a specific mood journal entry — each mood entry in the Journal page must have a delete icon that calls the backend `deleteMoodEntry(id)` function; (3) Clear all analytics history (weekly/monthly) — a 'Clear Analytics History' button that calls a backend function `clearAnalyticsHistory()` deleting all stress readings for the user; (4) Reset device pairing data without deleting the account — a 'Reset Device Data' button that calls `clearDevicePairings()` on the backend. All destructive actions must show a brief inline confirmation ('Are you sure?') before executing. Backend must implement or expose these deletion functions in the main Motoko actor.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Delete individual stress logs.",
+          "Delete mood entries.",
+          "Clear weekly/monthly analytics history.",
+          "Reset only device data without deleting account."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each stress log entry in the Analytics page and any log list renders a delete icon button.",
+        "Clicking a stress log delete icon shows an inline 'Are you sure?' prompt; confirming calls the backend and removes the entry from the UI.",
+        "Each mood journal entry in the Journal page renders a delete icon button with the same inline confirmation pattern.",
+        "Privacy Dashboard 'Clear Analytics History' button triggers a backend call that removes all stress readings for the user; UI reflects the cleared state.",
+        "Privacy Dashboard 'Reset Device Data' button triggers a backend call that removes all device pairing records; the Manage Connected Devices list becomes empty.",
+        "All four backend functions (`deleteStressReading`, `deleteMoodEntry`, `clearAnalyticsHistory`, `clearDevicePairings`) exist in `backend/main.mo` with proper authorization checks."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Enhance the existing data export feature in Settings to support three export formats: JSON (already partially implemented in `frontend/src/utils/dataExport.ts`), CSV, and a structured PDF summary report. Add a format selector (radio group or segmented control: JSON / CSV / PDF) before the download button. The JSON export must include all user data (profile, stress readings, mood entries, sleep entries, breathing sessions). The CSV export must produce a flat spreadsheet of stress readings with columns: date, stressScore, heartRate, skinTemp, motion. The PDF export must generate a formatted summary report with the user's name, avatar, total sessions, average stress score, mood trend, and a 7-day stress chart as text-based ASCII or table. All exports must be triggered as in-app browser downloads. Extend `frontend/src/utils/dataExport.ts` with `exportAsCSV` and `exportAsPDF` utility functions.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Add an option: 'Download My Data'. Export as: JSON, CSV, PDF summary report. Delivered securely via email or in-app download."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Settings page export section shows a format selector with JSON, CSV, and PDF options.",
+        "Selecting JSON and clicking download triggers the existing JSON export, producing a timestamped `.json` file.",
+        "Selecting CSV and clicking download produces a `.csv` file with columns: date, stressScore, heartRate, skinTemp, motion.",
+        "Selecting PDF and clicking download produces a `.pdf` file (or a `.html` print-ready file) with a structured summary report including user name, total sessions, average stress score, and a readable 7-day data table.",
+        "`frontend/src/utils/dataExport.ts` exports `exportAsCSV` and `exportAsPDF` functions.",
+        "All downloads use a timestamped filename pattern (e.g., `tranquil-export-2024-01-15.csv`)."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add backend Motoko data model and storage support for: (1) a `pendingDeletion: Bool` and `deletionScheduledAt: ?Int` field on the `UserProfile` type; (2) a `devicePairings: [DevicePairing]` array on the user profile storing `{ deviceId: Text; deviceName: Text; pairedAt: Int }`; (3) privacy preference fields on `UserProfile`: `analyticsEnabled: Bool` and `aiPredictionEnabled: Bool`. Expose the following new actor functions with caller-authorization: `requestAccountDeletion()`, `cancelAccountDeletion()`, `deleteStressReading(id: Nat)`, `deleteMoodEntry(id: Nat)`, `clearAnalyticsHistory()`, `addDevicePairing(deviceId: Text, deviceName: Text)`, `removeDevicePairing(deviceId: Text)`, `clearDevicePairings()`, `updatePrivacyPreferences(analyticsEnabled: Bool, aiPredictionEnabled: Bool)`. All mutation functions must verify `msg.caller` matches the record owner before modifying data.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "the app must give users full ownership control over their mental health data",
+          "Backend Deletion Flow: Re-authenticate user, Delete related collections, Delete authentication record, Invalidate active tokens, Confirm deletion to user, Log deletion event (without personal data)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`UserProfile` type in `backend/main.mo` includes `pendingDeletion`, `deletionScheduledAt`, `analyticsEnabled`, `aiPredictionEnabled`, and `devicePairings` fields.",
+        "`requestAccountDeletion()` sets `pendingDeletion = true` and `deletionScheduledAt` to current time and returns `#ok`.",
+        "`cancelAccountDeletion()` clears the pending deletion flag and returns `#ok`.",
+        "`deleteStressReading(id)` removes the specified reading only if it belongs to `msg.caller`, returns `#err(#Unauthorized)` otherwise.",
+        "`deleteMoodEntry(id)` removes the specified entry only if it belongs to `msg.caller`.",
+        "`clearAnalyticsHistory()` removes all stress readings for `msg.caller`.",
+        "`addDevicePairing`, `removeDevicePairing`, `clearDevicePairings` manage the `devicePairings` array scoped to `msg.caller`.",
+        "`updatePrivacyPreferences` updates `analyticsEnabled` and `aiPredictionEnabled` for `msg.caller`.",
+        "All functions return `Result<(), AppError>` and include `#Unauthorized` error variant checks."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Add a GDPR/compliance UI layer: (1) On first login (after Internet Identity auth, before profile setup), display a Terms & Conditions and Privacy Policy acceptance modal. The modal must show a scrollable summary of data practices, a checkbox 'I accept the Terms & Conditions and Privacy Policy', and a 'Continue' button that is disabled until the checkbox is checked. Record `termsAcceptedAt: ?Int` on the user profile backend. (2) Add a 'Privacy Policy' and 'Terms & Conditions' link in the Settings page footer that opens a modal with the full policy text. (3) In the Privacy Dashboard, add a 'Data Usage Explanation' section describing in plain language what data is collected, why it is used, and how long it is retained.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "Compliance Requirements: GDPR principles, Indian IT Data Protection standards, Clear Privacy Policy integration, Terms & Conditions acceptance tracking."
+        ]
+      },
+      "acceptanceCriteria": [
+        "First-time users see a T&C / Privacy Policy acceptance modal before the profile setup modal.",
+        "The 'Continue' button on the acceptance modal is disabled until the acceptance checkbox is checked.",
+        "Accepting the T&C calls a backend function that records `termsAcceptedAt` timestamp on the user profile.",
+        "Users who have already accepted are not shown the modal again on subsequent logins.",
+        "Settings page footer contains 'Privacy Policy' and 'Terms & Conditions' links that open a read-only modal.",
+        "Privacy Dashboard includes a 'Data Usage Explanation' section with plain-language descriptions of data collection, purpose, and retention period.",
+        "`UserProfile` in `backend/main.mo` includes a `termsAcceptedAt: ?Int` field and a `recordTermsAcceptance()` function."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Update the React Query hooks in `frontend/src/hooks/useQueries.ts` to include mutations and queries for all new backend functions: `useRequestAccountDeletion`, `useCancelAccountDeletion`, `useDeleteStressReading`, `useDeleteMoodEntry`, `useClearAnalyticsHistory`, `useAddDevicePairing`, `useRemoveDevicePairing`, `useClearDevicePairings`, `useUpdatePrivacyPreferences`, `useRecordTermsAcceptance`. Each mutation must invalidate the relevant query cache keys on success. Add a `useGetUserPrivacyPreferences` query that reads `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "the app must give users full ownership control over their mental health data, ensuring transparency, security, and trust"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All listed mutation hooks exist and are exported from `useQueries.ts`.",
+        "Each mutation hook calls the corresponding backend actor method.",
+        "On success, each mutation invalidates the appropriate React Query cache keys (e.g., `['userProfile']`, `['stressReadings']`, `['moodEntries']`).",
+        "`useGetUserPrivacyPreferences` returns `analyticsEnabled`, `aiPredictionEnabled`, `devicePairings`, `pendingDeletion`, and `termsAcceptedAt` from the user profile query.",
+        "TypeScript types are correctly inferred with no `any` casts."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Apply a cohesive visual upgrade to the TRANQUIL app to make it more engaging and premium. Introduce a calm, therapeutic visual identity: deep teal-to-indigo gradient backgrounds on the Dashboard hero area, soft glassmorphism card surfaces (frosted glass effect with backdrop-blur), subtle ambient glow effects on the stress gauge and breathing circle, smooth entrance animations (fade-in + slide-up) on page load, and micro-interaction hover/press states on all interactive elements. Update the color palette in `frontend/src/index.css` and `frontend/tailwind.config.js` to introduce richer jewel-tone accent colors (teal, sage green, soft gold) while preserving the existing OKLCH variable structure. All changes must remain consistent across dark and light themes and all breakpoints.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-recent"
+        ],
+        "quotes": [
+          "develop the app in more interesting and more opportunities way"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dashboard hero section displays a teal-to-indigo gradient background.",
+        "Card components use a frosted-glass / glassmorphism surface style with backdrop-blur.",
+        "Stress gauge and breathing circle have a soft ambient glow effect.",
+        "Page transitions include a fade-in + slide-up entrance animation.",
+        "All interactive elements (buttons, tiles, toggles) have visible hover and active press states.",
+        "New accent color tokens (teal, sage, gold) are defined as OKLCH CSS variables in `frontend/src/index.css`.",
+        "Visual consistency is maintained across light mode, dark mode, mobile, tablet, and desktop viewports."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "Do not change the backend schema or Motoko logic",
-    "Preserve all existing design tokens and OKLCH color palette — only fix inconsistent application of them"
+    "Do not use Firebase, Cloud Functions, or any external backend services — all data storage and deletion logic must be implemented in the Motoko single-actor backend (`backend/main.mo`).",
+    "Do not edit any file under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or `frontend/src/components/ui`.",
+    "All authorization checks in Motoko functions must verify `msg.caller` matches the data owner before any mutation.",
+    "Biometric re-authentication and BLE encryption are browser/device-level features; implement UI affordances and document limitations — do not simulate security that does not exist.",
+    "Do not introduce any external databases, cloud providers, or third-party auth services."
   ],
   "nonGoals": [
-    "Adding new features or pages",
-    "Changing the visual design language or color palette itself",
-    "Adding Internet Identity login changes",
-    "Backend modifications"
+    "Firebase Firestore, Firebase Authentication, and Firebase Cloud Functions integration — the platform uses ICP/Motoko only.",
+    "Real-time BLE communication or actual hardware pairing — simulated sensor data is already in place.",
+    "Email delivery of exported data files — only in-app browser downloads are supported.",
+    "Native mobile app builds (iOS/Android APK) — this is a PWA.",
+    "Multi-factor authentication via SMS or TOTP — only Internet Identity is the supported auth mechanism.",
+    "Actual AES-256 client-side encryption of stored data beyond what ICP provides natively."
   ],
   "imageRequirements": {
-    "required": [],
+    "required": [
+      "Abstract calming gradient background with soft teal, deep indigo, and sage green organic blobs on a dark navy base, no text (privacy-dashboard-bg.dim_1200x800.png)",
+      "TRANQUIL app logo mark — a minimal outlined lotus or wave symbol in soft teal on transparent background (tranquil-logo-mark.dim_256x256.png)"
+    ],
     "edits": []
   }
 }

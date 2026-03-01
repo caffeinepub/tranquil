@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { LogOut, Edit2, Check, X } from 'lucide-react';
+import { LogOut, Edit2, Check, X, Shield } from 'lucide-react';
 
 export function Profile() {
   const { data: profile, isLoading } = useGetCallerUserProfile();
@@ -148,15 +148,21 @@ export function Profile() {
               { emoji: '😴', label: 'Sleep Tracking', path: '/sleep' },
               { emoji: '📳', label: 'Vibration Control', path: '/vibration' },
               { emoji: '💡', label: 'AI Tips & Reminders', path: '/tips' },
+              { icon: <Shield size={18} className="text-primary" />, label: 'Privacy Dashboard', path: '/privacy', highlight: true },
             ].map(item => (
               <a
                 key={item.path}
                 href={item.path}
-                className="flex items-center gap-3 p-4 bg-card rounded-2xl border border-border
-                  hover:border-primary/30 hover:shadow-soft transition-all duration-200"
+                className={`flex items-center gap-3 p-4 bg-card rounded-2xl border transition-all duration-200 ${
+                  item.highlight
+                    ? 'border-primary/30 hover:border-primary/50 hover:shadow-soft'
+                    : 'border-border hover:border-primary/30 hover:shadow-soft'
+                }`}
               >
-                <span className="text-xl">{item.emoji}</span>
-                <span className="text-sm font-semibold text-foreground">{item.label}</span>
+                <span className="text-xl">{'emoji' in item ? item.emoji : item.icon}</span>
+                <span className={`text-sm font-semibold ${item.highlight ? 'text-primary' : 'text-foreground'}`}>
+                  {item.label}
+                </span>
                 <span className="ml-auto text-muted-foreground">›</span>
               </a>
             ))}
