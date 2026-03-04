@@ -1,64 +1,11 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
-  "summary": "A mental wellness app (TRANQUIL) with full responsiveness, consistent color theming, and a comprehensive Privacy & Data Control section inside Settings — featuring full account deletion with re-auth/biometric confirmation, selective data deletion, data download (JSON/CSV/PDF), AES-256 encryption, Firebase Security Rules, MFA, GDPR and Indian IT compliance, and privacy-first UI design.",
-  "architectural_notes": [
-    "Firebase Firestore + Firebase Authentication used as backend; account deletion must trigger a secure Cloud Function to remove all user data and invalidate sessions within 30 seconds.",
-    "AES-256 encryption required for all stored data; encrypted BLE communication for device interactions; HTTPS for all backend calls.",
-    "GDPR and Indian IT Act compliance required: user consent tracking, Privacy Policy integration, Terms & Conditions acceptance logging."
-  ],
+  "projectStateVersion": 3,
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [],
   "isFixRequest": false,
-  "existing_features": [
-    {
-      "id": "feature-add-a-privacy-data-control-section-inside-the-settings-page-this-section-must-contain-clearly-labeled-sub-sections-for-full-account-deletion-selective-data-deletion-and-download-my-data-use-a-calm-blue-teal-theme-consistent-with-the-existing-design-tokens-clear-plain-english-labels-and-no-dark-patterns",
-      "title": "Add a 'Privacy & Data Control' section inside the Settings page. This section must contain clearly labeled sub-sections for Full Account Deletion, Selective Data Deletion, and Download My Data. Use a calm blue/teal theme consistent with the existing design tokens, clear plain-English labels, and no dark patterns.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-full-account-deletion-flow-inside-the-privacy-data-control-section-show-a-red-delete-account-button-on-click-open-the-existing-deleteaccountmodal-or-enhance-it-to-1-require-password-re-authentication-2-support-biometric-confirmation-via-the-existing-usebiometricauth-hook-3-display-the-warning-this-action-is-permanent-and-cannot-be-undone-4-offer-an-optional-7-day-recovery-period-toggle-before-confirming-on-confirmation-delete-all-user-data-from-the-backend-profile-stress-logs-mood-logs-sleep-data-device-history-by-calling-the-appropriate-backend-actor-methods-log-a-deletion-event-without-personal-data-and-invalidate-all-active-react-query-sessions",
-      "title": "Implement a Full Account Deletion flow inside the Privacy & Data Control section. Show a red 'Delete Account' button. On click, open the existing DeleteAccountModal (or enhance it) to: (1) require password re-authentication, (2) support biometric confirmation via the existing useBiometricAuth hook, (3) display the warning 'This action is permanent and cannot be undone.', (4) offer an optional 7-day recovery period toggle before confirming. On confirmation, delete all user data from the backend (profile, stress logs, mood logs, sleep data, device history) by calling the appropriate backend actor methods, log a deletion event without personal data, and invalidate all active React Query sessions.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-selective-data-deletion-inside-the-privacy-data-control-section-using-the-existing-selectivedatadeletioncard-component-or-an-enhanced-version-users-must-be-able-to-independently-delete-individual-stress-log-entries-individual-mood-entries-all-analytics-history-and-device-pairing-data-each-action-must-show-a-confirmation-dialog-before-executing-and-display-a-toast-notification-on-success-or-failure",
-      "title": "Implement Selective Data Deletion inside the Privacy & Data Control section using the existing SelectiveDataDeletionCard component (or an enhanced version). Users must be able to independently delete: individual stress log entries, individual mood entries, all analytics history, and device pairing data. Each action must show a confirmation dialog before executing and display a toast notification on success or failure.",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-download-my-data-button-inside-the-privacy-data-control-section-when-clicked-present-export-format-options-json-csv-and-pdf-summary-use-the-existing-dataexport-ts-utility-functions-for-generating-the-files-trigger-a-secure-in-app-client-side-download-for-each-format-the-exported-data-must-include-stress-readings-mood-entries-sleep-data-and-profile-information",
-      "title": "Add a 'Download My Data' button inside the Privacy & Data Control section. When clicked, present export format options: JSON, CSV, and PDF summary. Use the existing dataExport.ts utility functions for generating the files. Trigger a secure in-app client-side download for each format. The exported data must include stress readings, mood entries, sleep data, and profile information.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-display-security-information-prominently-within-the-privacy-data-control-section-using-the-existing-securityinfocard-component-the-card-must-list-aes-256-encryption-for-stored-data-encrypted-ble-communication-firebase-security-rules-enforcement-multi-factor-authentication-option-biometric-re-authentication-and-https-secure-backend-present-this-as-reassurance-for-users-with-icons-and-brief-descriptions",
-      "title": "Display security information prominently within the Privacy & Data Control section using the existing SecurityInfoCard component. The card must list: AES-256 encryption for stored data, encrypted BLE communication, Firebase Security Rules enforcement, Multi-factor authentication option, Biometric re-authentication, and HTTPS secure backend. Present this as reassurance for users, with icons and brief descriptions.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-compliance-sub-section-within-privacy-data-control-that-1-displays-a-compliance-summary-stating-adherence-to-gdpr-principles-and-indian-it-data-protection-standards-2-shows-the-user-s-recorded-consent-timestamps-for-privacy-policy-and-terms-conditions-using-the-existing-compliancecard-component-3-provides-links-to-view-the-privacy-policy-and-terms-of-service-via-the-existing-policymodal-component-and-4-includes-a-privacy-first-messaging-statement-explaining-that-the-user-has-full-ownership-and-control-over-their-mental-health-data",
-      "title": "Add a Compliance sub-section within Privacy & Data Control that: (1) displays a compliance summary stating adherence to GDPR principles and Indian IT data protection standards, (2) shows the user's recorded consent timestamps for Privacy Policy and Terms & Conditions using the existing ComplianceCard component, (3) provides links to view the Privacy Policy and Terms of Service via the existing PolicyModal component, and (4) includes a privacy-first messaging statement explaining that the user has full ownership and control over their mental health data.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    }
-  ],
+  "existing_features": [],
   "new_feature_requests": [
     {
       "id": "AR-1",
@@ -81,35 +28,8 @@
         "REQ-2"
       ],
       "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Add Privacy & Data Control section inside Settings with: full account deletion (red button, password re-auth, biometric confirm, 7-day recovery, Firebase Firestore + Auth cleanup, secure Cloud Function, session invalidation, deletion logging), selective deletion of stress logs/mood entries/analytics/device data, and Download My Data button with JSON/CSV/PDF export via secure in-app or encrypted email.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Implement security requirements: AES-256 encryption for stored data, encrypted BLE communication, Firebase Security Rules, MFA option, biometric re-authentication, and HTTPS secure backend.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Ensure compliance with GDPR principles and Indian IT data protection standards: track user consent, integrate Privacy Policy, track Terms & Conditions acceptance, and apply privacy-first messaging with no dark patterns.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Add backend actor methods to support the full account deletion flow: a deleteAllUserData function that removes all data for the calling user (profile, stress readings, mood entries, sleep entries, breathing sessions, device/vibration history) from all internal Maps in a single call, and a logDeletionEvent function that records a timestamped deletion event without storing any personal data (only a hash or anonymous identifier). Ensure these methods enforce caller-based authorization so only the authenticated user can delete their own data.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "status": "pending"
     }
   ],
-  "gameProjectType": "none",
   "projectName": "TRANQUIL",
   "clarification_mode": "instant",
   "clarification_rounds": 0

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { ConsentType, StressLevel, UserProfile, StressReading, MoodEntry, SleepEntry, BreathingSession, VibrationCommand, ReminderPreferences, UserDataView, ConsentRecord, TipCard, DeletionSchedule } from '../backend';
-import { toast } from 'sonner';
+import type { UserProfile, StressLevel, ReminderPreferences } from '../backend';
 
 // ─── User Profile ────────────────────────────────────────────────────────────
 
@@ -57,38 +56,6 @@ export function useUpdateUserProfile() {
 
 // ─── Stress Readings ─────────────────────────────────────────────────────────
 
-export function useGetWeeklyStressAnalytics() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<StressReading[]>({
-    queryKey: ['weeklyStress'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getWeeklyStressAnalytics();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// Alias for backwards compatibility
-export const useWeeklyStressAnalytics = useGetWeeklyStressAnalytics;
-
-export function useGetLatestStressReading() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<StressReading | null>({
-    queryKey: ['latestStress'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getLatestStressReading();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// Alias for backwards compatibility
-export const useLatestStressReading = useGetLatestStressReading;
-
 export function useAddStressReading() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -111,28 +78,37 @@ export function useAddStressReading() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['weeklyStress'] });
       queryClient.invalidateQueries({ queryKey: ['latestStress'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
 
-// ─── Breathing Sessions ──────────────────────────────────────────────────────
-
-export function useGetBreathingSessions() {
+export function useWeeklyStressAnalytics() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<BreathingSession[]>({
-    queryKey: ['breathingSessions'],
+  return useQuery({
+    queryKey: ['weeklyStress'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getBreathingSessions();
+      return actor.getWeeklyStressAnalytics();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-// Alias for backwards compatibility
-export const useBreathingSessions = useGetBreathingSessions;
+export function useLatestStressReading() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
+    queryKey: ['latestStress'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getLatestStressReading();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Breathing Sessions ───────────────────────────────────────────────────────
 
 export function useAddBreathingSession() {
   const { actor } = useActor();
@@ -146,17 +122,45 @@ export function useAddBreathingSession() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['breathingSessions'] });
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
 
-// ─── Mood Entries ────────────────────────────────────────────────────────────
-
-export function useGetMoodEntriesThisWeek() {
+export function useBreathingSessions() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<MoodEntry[]>({
+  return useQuery({
+    queryKey: ['breathingSessions'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getBreathingSessions();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── Mood Entries ─────────────────────────────────────────────────────────────
+
+export function useAddMoodEntry() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ mood, note }: { mood: string; note: string | null }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.addMoodEntry(mood, note);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+    },
+  });
+}
+
+export function useMoodEntriesThisWeek() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery({
     queryKey: ['moodEntries'],
     queryFn: async () => {
       if (!actor) return [];
@@ -166,43 +170,7 @@ export function useGetMoodEntriesThisWeek() {
   });
 }
 
-// Alias for backwards compatibility
-export const useMoodEntriesThisWeek = useGetMoodEntriesThisWeek;
-
-export function useAddMoodEntry() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ mood, note }: { mood: string; note?: string | null }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.addMoodEntry(mood, note ?? null);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
-    },
-  });
-}
-
-// ─── Sleep Entries ───────────────────────────────────────────────────────────
-
-export function useGetSleepEntries() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<SleepEntry[]>({
-    queryKey: ['sleepEntries'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getSleepEntries();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// Alias for backwards compatibility
-export const useSleepEntries = useGetSleepEntries;
+// ─── Sleep Entries ────────────────────────────────────────────────────────────
 
 export function useAddSleepEntry() {
   const { actor } = useActor();
@@ -225,25 +193,24 @@ export function useAddSleepEntry() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sleepEntries'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
 
-// ─── Vibration Commands ──────────────────────────────────────────────────────
-
-export function useGetVibrationCommands() {
+export function useSleepEntries() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<VibrationCommand[]>({
-    queryKey: ['vibrationCommands'],
+  return useQuery({
+    queryKey: ['sleepEntries'],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getVibrationCommands();
+      return actor.getSleepEntries();
     },
     enabled: !!actor && !isFetching,
   });
 }
+
+// ─── Vibration Commands ───────────────────────────────────────────────────────
 
 export function useAddVibrationCommand() {
   const { actor } = useActor();
@@ -256,47 +223,33 @@ export function useAddVibrationCommand() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vibrationCommands'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
     },
   });
 }
 
-// ─── Reminder Preferences ────────────────────────────────────────────────────
+// ─── Reminder Preferences ─────────────────────────────────────────────────────
 
-export function useGetReminderPrefs() {
+export function useReminderPrefs() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<ReminderPreferences>({
+  return useQuery({
     queryKey: ['reminderPrefs'],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
+      if (!actor) return null;
       return actor.getReminderPrefs();
     },
     enabled: !!actor && !isFetching,
   });
 }
 
-// Alias for backwards compatibility
-export const useReminderPrefs = useGetReminderPrefs;
-
 export function useUpdateReminderPrefs() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      hydration,
-      breaks,
-      stretch,
-      intervals,
-    }: {
-      hydration: boolean;
-      breaks: boolean;
-      stretch: boolean;
-      intervals: bigint;
-    }) => {
+    mutationFn: async (prefs: { hydration: boolean; breaks: boolean; stretch: boolean; intervals: bigint }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateReminderPrefs(hydration, breaks, stretch, intervals);
+      return actor.updateReminderPrefs(prefs.hydration, prefs.breaks, prefs.stretch, prefs.intervals);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminderPrefs'] });
@@ -304,12 +257,12 @@ export function useUpdateReminderPrefs() {
   });
 }
 
-// ─── Tips ────────────────────────────────────────────────────────────────────
+// ─── Tips ─────────────────────────────────────────────────────────────────────
 
-export function useGetTips() {
+export function useTips() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<TipCard[]>({
+  return useQuery({
     queryKey: ['tips'],
     queryFn: async () => {
       if (!actor) return [];
@@ -319,15 +272,12 @@ export function useGetTips() {
   });
 }
 
-// Alias for backwards compatibility
-export const useTips = useGetTips;
-
-// ─── User Data (Export) ──────────────────────────────────────────────────────
+// ─── User Data (export) ───────────────────────────────────────────────────────
 
 export function useGetUserData() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<UserDataView | null>({
+  return useQuery({
     queryKey: ['userData'],
     queryFn: async () => {
       if (!actor) return null;
@@ -335,248 +285,5 @@ export function useGetUserData() {
     },
     enabled: !!actor && !isFetching,
     staleTime: Infinity,
-  });
-}
-
-// ─── Privacy Preferences (derived from user data) ────────────────────────────
-
-export function useGetUserPrivacyPreferences() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  const query = useQuery({
-    queryKey: ['privacyPreferences'],
-    queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      const data = await actor.getUserData();
-      return {
-        analyticsEnabled: true,
-        aiPredictionEnabled: true,
-        devicePairings: [] as string[],
-        pendingDeletion: false,
-        termsAcceptedAt: null as bigint | null,
-        stressReadingsCount: data?.stressReadings.length ?? 0,
-        moodEntriesCount: data?.moodEntries.length ?? 0,
-        sleepEntriesCount: data?.sleepEntries.length ?? 0,
-        breathingSessionsCount: data?.breathingSessions.length ?? 0,
-      };
-    },
-    enabled: !!actor && !actorFetching,
-  });
-
-  return {
-    ...query,
-    isLoading: actorFetching || query.isLoading,
-    isFetched: !!actor && query.isFetched,
-  };
-}
-
-// ─── Selective Data Deletion ─────────────────────────────────────────────────
-
-export function useDeleteStressReading() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (timestamp: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteStressReading(timestamp);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['weeklyStress'] });
-      queryClient.invalidateQueries({ queryKey: ['latestStress'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
-    },
-  });
-}
-
-export function useDeleteMoodEntry() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (timestamp: bigint) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteMoodEntry(timestamp);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
-    },
-  });
-}
-
-export function useClearAnalyticsHistory() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.clearAnalyticsHistory();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['weeklyStress'] });
-      queryClient.invalidateQueries({ queryKey: ['latestStress'] });
-      queryClient.invalidateQueries({ queryKey: ['moodEntries'] });
-      queryClient.invalidateQueries({ queryKey: ['sleepEntries'] });
-      queryClient.invalidateQueries({ queryKey: ['breathingSessions'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
-      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
-    },
-  });
-}
-
-export function useResetDevicePairing() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.resetDevicePairing();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vibrationCommands'] });
-      queryClient.invalidateQueries({ queryKey: ['userData'] });
-      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
-    },
-  });
-}
-
-// ─── Full Account Deletion ───────────────────────────────────────────────────
-
-export function useDeleteAccount() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (withRecoveryPeriod: boolean) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteAccount(withRecoveryPeriod);
-    },
-    onSuccess: () => {
-      queryClient.clear();
-    },
-  });
-}
-
-export function useDeleteAllUserData() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.deleteAllUserData();
-    },
-    onSuccess: () => {
-      queryClient.clear();
-    },
-  });
-}
-
-export function useLogDeletionEvent() {
-  const { actor } = useActor();
-
-  return useMutation({
-    mutationFn: async (hashedIdentifier: Uint8Array) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.logDeletionEvent(hashedIdentifier);
-    },
-  });
-}
-
-export function useGetDeletionStatus() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<DeletionSchedule | null>({
-    queryKey: ['deletionStatus'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getDeletionStatus();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-// ─── Consent Management ──────────────────────────────────────────────────────
-
-export function useGetConsents() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<ConsentRecord[]>({
-    queryKey: ['consents'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getConsents();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useHasConsented(consentType: ConsentType) {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['hasConsented', consentType],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.hasConsented(consentType);
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useRecordConsent() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (consentType: ConsentType) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.recordConsent(consentType);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['consents'] });
-      queryClient.invalidateQueries({ queryKey: ['hasConsented'] });
-    },
-  });
-}
-
-// ─── Legacy / Compatibility ───────────────────────────────────────────────────
-
-export function useClearDevicePairings() {
-  return useResetDevicePairing();
-}
-
-export function useRequestAccountDeletion() {
-  return useDeleteAccount();
-}
-
-export function useUpdatePrivacyPreferences() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (_prefs: { analyticsEnabled: boolean; aiPredictionEnabled: boolean }) => {
-      await new Promise(resolve => setTimeout(resolve, 200));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
-    },
-  });
-}
-
-export function useRecordTermsAcceptance() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      localStorage.setItem('tranquil_terms_accepted', Date.now().toString());
-      await new Promise(resolve => setTimeout(resolve, 200));
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['privacyPreferences'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-    },
   });
 }

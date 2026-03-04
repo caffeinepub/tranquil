@@ -89,14 +89,14 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface _CaffeineStorageRefillResult {
-    success?: boolean;
-    topped_up_amount?: bigint;
-}
 export interface BreathingSession {
     technique: string;
     durationSeconds: bigint;
     timestamp: bigint;
+}
+export interface _CaffeineStorageRefillResult {
+    success?: boolean;
+    topped_up_amount?: bigint;
 }
 export interface SleepEntry {
     bedtime: bigint;
@@ -107,10 +107,6 @@ export interface SleepEntry {
 }
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
-}
-export interface DeletionSchedule {
-    deletionTime: bigint;
-    isScheduled: boolean;
 }
 export interface VibrationCommand {
     pattern: string;
@@ -130,10 +126,6 @@ export interface MoodEntry {
     mood: string;
     note?: string;
     timestamp: bigint;
-}
-export interface ConsentRecord {
-    timestamp: bigint;
-    consentType: ConsentType;
 }
 export interface StressReading {
     stressLevel: StressLevel;
@@ -164,11 +156,6 @@ export interface ReminderPreferences {
     hydration: boolean;
     stretch: boolean;
 }
-export enum ConsentType {
-    privacyPolicy = "privacyPolicy",
-    dataSharing = "dataSharing",
-    termsOfService = "termsOfService"
-}
 export enum StressLevel {
     low = "low",
     high = "high",
@@ -193,16 +180,9 @@ export interface backendInterface {
     addStressReading(heartRate: bigint, skinTemp: number, motion: bigint, stressLevel: StressLevel): Promise<void>;
     addVibrationCommand(pattern: string, intensity: bigint): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    clearAnalyticsHistory(): Promise<void>;
-    deleteAccount(withRecoveryPeriod: boolean): Promise<void>;
-    deleteAllUserData(): Promise<void>;
-    deleteMoodEntry(timestamp: bigint): Promise<void>;
-    deleteStressReading(timestamp: bigint): Promise<void>;
     getBreathingSessions(): Promise<Array<BreathingSession>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getConsents(): Promise<Array<ConsentRecord>>;
-    getDeletionStatus(): Promise<DeletionSchedule | null>;
     getLatestStressReading(): Promise<StressReading | null>;
     getMoodEntriesThisWeek(): Promise<Array<MoodEntry>>;
     getReadingsWithTip(_tip: string): Promise<Array<StressReading>>;
@@ -213,16 +193,12 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVibrationCommands(): Promise<Array<VibrationCommand>>;
     getWeeklyStressAnalytics(): Promise<Array<StressReading>>;
-    hasConsented(consentType: ConsentType): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
-    logDeletionEvent(hashedIdentifier: Uint8Array): Promise<void>;
-    recordConsent(consentType: ConsentType): Promise<void>;
-    resetDevicePairing(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateReminderPrefs(hydration: boolean, breaks: boolean, stretch: boolean, intervals: bigint): Promise<void>;
     updateUserProfile(name: string, avatarId: bigint): Promise<void>;
 }
-import type { BreathingSession as _BreathingSession, ConsentRecord as _ConsentRecord, ConsentType as _ConsentType, DeletionSchedule as _DeletionSchedule, MoodEntry as _MoodEntry, ReminderPreferences as _ReminderPreferences, SleepEntry as _SleepEntry, StressLevel as _StressLevel, StressReading as _StressReading, UserDataView as _UserDataView, UserProfile as _UserProfile, UserRole as _UserRole, VibrationCommand as _VibrationCommand, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
+import type { BreathingSession as _BreathingSession, MoodEntry as _MoodEntry, ReminderPreferences as _ReminderPreferences, SleepEntry as _SleepEntry, StressLevel as _StressLevel, StressReading as _StressReading, UserDataView as _UserDataView, UserProfile as _UserProfile, UserRole as _UserRole, VibrationCommand as _VibrationCommand, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _caffeineStorageBlobIsLive(arg0: Uint8Array): Promise<boolean> {
@@ -407,76 +383,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async clearAnalyticsHistory(): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.clearAnalyticsHistory();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.clearAnalyticsHistory();
-            return result;
-        }
-    }
-    async deleteAccount(arg0: boolean): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.deleteAccount(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.deleteAccount(arg0);
-            return result;
-        }
-    }
-    async deleteAllUserData(): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.deleteAllUserData();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.deleteAllUserData();
-            return result;
-        }
-    }
-    async deleteMoodEntry(arg0: bigint): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.deleteMoodEntry(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.deleteMoodEntry(arg0);
-            return result;
-        }
-    }
-    async deleteStressReading(arg0: bigint): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.deleteStressReading(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.deleteStressReading(arg0);
-            return result;
-        }
-    }
     async getBreathingSessions(): Promise<Array<BreathingSession>> {
         if (this.processError) {
             try {
@@ -519,74 +425,46 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n14(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getConsents(): Promise<Array<ConsentRecord>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getConsents();
-                return from_candid_vec_n16(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getConsents();
-            return from_candid_vec_n16(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async getDeletionStatus(): Promise<DeletionSchedule | null> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getDeletionStatus();
-                return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getDeletionStatus();
-            return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
-        }
-    }
     async getLatestStressReading(): Promise<StressReading | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getLatestStressReading();
-                return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n16(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getLatestStressReading();
-            return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n16(this._uploadFile, this._downloadFile, result);
         }
     }
     async getMoodEntriesThisWeek(): Promise<Array<MoodEntry>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getMoodEntriesThisWeek();
-                return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getMoodEntriesThisWeek();
-            return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
         }
     }
     async getReadingsWithTip(arg0: string): Promise<Array<StressReading>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getReadingsWithTip(arg0);
-                return from_candid_vec_n31(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getReadingsWithTip(arg0);
-            return from_candid_vec_n31(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
         }
     }
     async getReminderPrefs(): Promise<ReminderPreferences> {
@@ -635,14 +513,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getUserData();
-                return from_candid_opt_n32(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n26(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getUserData();
-            return from_candid_opt_n32(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n26(this._uploadFile, this._downloadFile, result);
         }
     }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
@@ -677,28 +555,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getWeeklyStressAnalytics();
-                return from_candid_vec_n31(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getWeeklyStressAnalytics();
-            return from_candid_vec_n31(this._uploadFile, this._downloadFile, result);
-        }
-    }
-    async hasConsented(arg0: ConsentType): Promise<boolean> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.hasConsented(to_candid_ConsentType_n35(this._uploadFile, this._downloadFile, arg0));
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.hasConsented(to_candid_ConsentType_n35(this._uploadFile, this._downloadFile, arg0));
-            return result;
+            return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
         }
     }
     async isCallerAdmin(): Promise<boolean> {
@@ -712,48 +576,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.isCallerAdmin();
-            return result;
-        }
-    }
-    async logDeletionEvent(arg0: Uint8Array): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.logDeletionEvent(arg0);
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.logDeletionEvent(arg0);
-            return result;
-        }
-    }
-    async recordConsent(arg0: ConsentType): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.recordConsent(to_candid_ConsentType_n35(this._uploadFile, this._downloadFile, arg0));
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.recordConsent(to_candid_ConsentType_n35(this._uploadFile, this._downloadFile, arg0));
-            return result;
-        }
-    }
-    async resetDevicePairing(): Promise<void> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.resetDevicePairing();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.resetDevicePairing();
             return result;
         }
     }
@@ -800,23 +622,17 @@ export class Backend implements backendInterface {
         }
     }
 }
-function from_candid_ConsentRecord_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ConsentRecord): ConsentRecord {
-    return from_candid_record_n18(_uploadFile, _downloadFile, value);
+function from_candid_MoodEntry_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _MoodEntry): MoodEntry {
+    return from_candid_record_n23(_uploadFile, _downloadFile, value);
 }
-function from_candid_ConsentType_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ConsentType): ConsentType {
+function from_candid_StressLevel_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _StressLevel): StressLevel {
     return from_candid_variant_n20(_uploadFile, _downloadFile, value);
 }
-function from_candid_MoodEntry_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _MoodEntry): MoodEntry {
-    return from_candid_record_n29(_uploadFile, _downloadFile, value);
+function from_candid_StressReading_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _StressReading): StressReading {
+    return from_candid_record_n18(_uploadFile, _downloadFile, value);
 }
-function from_candid_StressLevel_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _StressLevel): StressLevel {
-    return from_candid_variant_n26(_uploadFile, _downloadFile, value);
-}
-function from_candid_StressReading_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _StressReading): StressReading {
-    return from_candid_record_n24(_uploadFile, _downloadFile, value);
-}
-function from_candid_UserDataView_n33(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserDataView): UserDataView {
-    return from_candid_record_n34(_uploadFile, _downloadFile, value);
+function from_candid_UserDataView_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserDataView): UserDataView {
+    return from_candid_record_n28(_uploadFile, _downloadFile, value);
 }
 function from_candid_UserRole_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
     return from_candid_variant_n15(_uploadFile, _downloadFile, value);
@@ -827,17 +643,14 @@ function from_candid__CaffeineStorageRefillResult_n4(_uploadFile: (file: Externa
 function from_candid_opt_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_DeletionSchedule]): DeletionSchedule | null {
+function from_candid_opt_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_StressReading]): StressReading | null {
+    return value.length === 0 ? null : from_candid_StressReading_n17(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_StressReading]): StressReading | null {
-    return value.length === 0 ? null : from_candid_StressReading_n23(_uploadFile, _downloadFile, value[0]);
-}
-function from_candid_opt_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
-    return value.length === 0 ? null : value[0];
-}
-function from_candid_opt_n32(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserDataView]): UserDataView | null {
-    return value.length === 0 ? null : from_candid_UserDataView_n33(_uploadFile, _downloadFile, value[0]);
+function from_candid_opt_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserDataView]): UserDataView | null {
+    return value.length === 0 ? null : from_candid_UserDataView_n27(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [boolean]): boolean | null {
     return value.length === 0 ? null : value[0];
@@ -846,18 +659,6 @@ function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
     return value.length === 0 ? null : value[0];
 }
 function from_candid_record_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    timestamp: bigint;
-    consentType: _ConsentType;
-}): {
-    timestamp: bigint;
-    consentType: ConsentType;
-} {
-    return {
-        timestamp: value.timestamp,
-        consentType: from_candid_ConsentType_n19(_uploadFile, _downloadFile, value.consentType)
-    };
-}
-function from_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     stressLevel: _StressLevel;
     heartRate: bigint;
     skinTemp: number;
@@ -871,14 +672,14 @@ function from_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uin
     motion: bigint;
 } {
     return {
-        stressLevel: from_candid_StressLevel_n25(_uploadFile, _downloadFile, value.stressLevel),
+        stressLevel: from_candid_StressLevel_n19(_uploadFile, _downloadFile, value.stressLevel),
         heartRate: value.heartRate,
         skinTemp: value.skinTemp,
         timestamp: value.timestamp,
         motion: value.motion
     };
 }
-function from_candid_record_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     mood: string;
     note: [] | [string];
     timestamp: bigint;
@@ -889,11 +690,11 @@ function from_candid_record_n29(_uploadFile: (file: ExternalBlob) => Promise<Uin
 } {
     return {
         mood: value.mood,
-        note: record_opt_to_undefined(from_candid_opt_n30(_uploadFile, _downloadFile, value.note)),
+        note: record_opt_to_undefined(from_candid_opt_n24(_uploadFile, _downloadFile, value.note)),
         timestamp: value.timestamp
     };
 }
-function from_candid_record_n34(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_record_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     reminderPrefs: _ReminderPreferences;
     sleepEntries: Array<_SleepEntry>;
     moodEntries: Array<_MoodEntry>;
@@ -913,10 +714,10 @@ function from_candid_record_n34(_uploadFile: (file: ExternalBlob) => Promise<Uin
     return {
         reminderPrefs: value.reminderPrefs,
         sleepEntries: value.sleepEntries,
-        moodEntries: from_candid_vec_n27(_uploadFile, _downloadFile, value.moodEntries),
+        moodEntries: from_candid_vec_n21(_uploadFile, _downloadFile, value.moodEntries),
         breathingSessions: value.breathingSessions,
         vibrationCommands: value.vibrationCommands,
-        stressReadings: from_candid_vec_n31(_uploadFile, _downloadFile, value.stressReadings),
+        stressReadings: from_candid_vec_n25(_uploadFile, _downloadFile, value.stressReadings),
         profile: value.profile
     };
 }
@@ -942,15 +743,6 @@ function from_candid_variant_n15(_uploadFile: (file: ExternalBlob) => Promise<Ui
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
 function from_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
-    privacyPolicy: null;
-} | {
-    dataSharing: null;
-} | {
-    termsOfService: null;
-}): ConsentType {
-    return "privacyPolicy" in value ? ConsentType.privacyPolicy : "dataSharing" in value ? ConsentType.dataSharing : "termsOfService" in value ? ConsentType.termsOfService : value;
-}
-function from_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     low: null;
 } | {
     high: null;
@@ -959,17 +751,11 @@ function from_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): StressLevel {
     return "low" in value ? StressLevel.low : "high" in value ? StressLevel.high : "medium" in value ? StressLevel.medium : value;
 }
-function from_candid_vec_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_ConsentRecord>): Array<ConsentRecord> {
-    return value.map((x)=>from_candid_ConsentRecord_n17(_uploadFile, _downloadFile, x));
+function from_candid_vec_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_MoodEntry>): Array<MoodEntry> {
+    return value.map((x)=>from_candid_MoodEntry_n22(_uploadFile, _downloadFile, x));
 }
-function from_candid_vec_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_MoodEntry>): Array<MoodEntry> {
-    return value.map((x)=>from_candid_MoodEntry_n28(_uploadFile, _downloadFile, x));
-}
-function from_candid_vec_n31(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_StressReading>): Array<StressReading> {
-    return value.map((x)=>from_candid_StressReading_n23(_uploadFile, _downloadFile, x));
-}
-function to_candid_ConsentType_n35(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ConsentType): _ConsentType {
-    return to_candid_variant_n36(_uploadFile, _downloadFile, value);
+function from_candid_vec_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_StressReading>): Array<StressReading> {
+    return value.map((x)=>from_candid_StressReading_n17(_uploadFile, _downloadFile, x));
 }
 function to_candid_StressLevel_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: StressLevel): _StressLevel {
     return to_candid_variant_n10(_uploadFile, _downloadFile, value);
@@ -1023,21 +809,6 @@ function to_candid_variant_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint
         user: null
     } : value == UserRole.guest ? {
         guest: null
-    } : value;
-}
-function to_candid_variant_n36(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: ConsentType): {
-    privacyPolicy: null;
-} | {
-    dataSharing: null;
-} | {
-    termsOfService: null;
-} {
-    return value == ConsentType.privacyPolicy ? {
-        privacyPolicy: null
-    } : value == ConsentType.dataSharing ? {
-        dataSharing: null
-    } : value == ConsentType.termsOfService ? {
-        termsOfService: null
     } : value;
 }
 export interface CreateActorOptions {

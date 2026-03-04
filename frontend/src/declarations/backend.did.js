@@ -41,19 +41,6 @@ export const UserProfile = IDL.Record({
   'totalBreathingSessions' : IDL.Nat,
   'avatarId' : IDL.Nat,
 });
-export const ConsentType = IDL.Variant({
-  'privacyPolicy' : IDL.Null,
-  'dataSharing' : IDL.Null,
-  'termsOfService' : IDL.Null,
-});
-export const ConsentRecord = IDL.Record({
-  'timestamp' : IDL.Int,
-  'consentType' : ConsentType,
-});
-export const DeletionSchedule = IDL.Record({
-  'deletionTime' : IDL.Int,
-  'isScheduled' : IDL.Bool,
-});
 export const StressReading = IDL.Record({
   'stressLevel' : StressLevel,
   'heartRate' : IDL.Nat,
@@ -137,16 +124,9 @@ export const idlService = IDL.Service({
     ),
   'addVibrationCommand' : IDL.Func([IDL.Text, IDL.Nat], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'clearAnalyticsHistory' : IDL.Func([], [], []),
-  'deleteAccount' : IDL.Func([IDL.Bool], [], []),
-  'deleteAllUserData' : IDL.Func([], [], []),
-  'deleteMoodEntry' : IDL.Func([IDL.Int], [], []),
-  'deleteStressReading' : IDL.Func([IDL.Int], [], []),
   'getBreathingSessions' : IDL.Func([], [IDL.Vec(BreathingSession)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getConsents' : IDL.Func([], [IDL.Vec(ConsentRecord)], ['query']),
-  'getDeletionStatus' : IDL.Func([], [IDL.Opt(DeletionSchedule)], ['query']),
   'getLatestStressReading' : IDL.Func([], [IDL.Opt(StressReading)], ['query']),
   'getMoodEntriesThisWeek' : IDL.Func([], [IDL.Vec(MoodEntry)], ['query']),
   'getReadingsWithTip' : IDL.Func(
@@ -169,11 +149,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(StressReading)],
       ['query'],
     ),
-  'hasConsented' : IDL.Func([ConsentType], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'logDeletionEvent' : IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
-  'recordConsent' : IDL.Func([ConsentType], [], []),
-  'resetDevicePairing' : IDL.Func([], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'updateReminderPrefs' : IDL.Func(
       [IDL.Bool, IDL.Bool, IDL.Bool, IDL.Nat],
@@ -218,19 +194,6 @@ export const idlFactory = ({ IDL }) => {
     'totalMoodEntries' : IDL.Nat,
     'totalBreathingSessions' : IDL.Nat,
     'avatarId' : IDL.Nat,
-  });
-  const ConsentType = IDL.Variant({
-    'privacyPolicy' : IDL.Null,
-    'dataSharing' : IDL.Null,
-    'termsOfService' : IDL.Null,
-  });
-  const ConsentRecord = IDL.Record({
-    'timestamp' : IDL.Int,
-    'consentType' : ConsentType,
-  });
-  const DeletionSchedule = IDL.Record({
-    'deletionTime' : IDL.Int,
-    'isScheduled' : IDL.Bool,
   });
   const StressReading = IDL.Record({
     'stressLevel' : StressLevel,
@@ -315,11 +278,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'addVibrationCommand' : IDL.Func([IDL.Text, IDL.Nat], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'clearAnalyticsHistory' : IDL.Func([], [], []),
-    'deleteAccount' : IDL.Func([IDL.Bool], [], []),
-    'deleteAllUserData' : IDL.Func([], [], []),
-    'deleteMoodEntry' : IDL.Func([IDL.Int], [], []),
-    'deleteStressReading' : IDL.Func([IDL.Int], [], []),
     'getBreathingSessions' : IDL.Func(
         [],
         [IDL.Vec(BreathingSession)],
@@ -327,8 +285,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getConsents' : IDL.Func([], [IDL.Vec(ConsentRecord)], ['query']),
-    'getDeletionStatus' : IDL.Func([], [IDL.Opt(DeletionSchedule)], ['query']),
     'getLatestStressReading' : IDL.Func(
         [],
         [IDL.Opt(StressReading)],
@@ -359,11 +315,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(StressReading)],
         ['query'],
       ),
-    'hasConsented' : IDL.Func([ConsentType], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'logDeletionEvent' : IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
-    'recordConsent' : IDL.Func([ConsentType], [], []),
-    'resetDevicePairing' : IDL.Func([], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'updateReminderPrefs' : IDL.Func(
         [IDL.Bool, IDL.Bool, IDL.Bool, IDL.Nat],

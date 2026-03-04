@@ -19,10 +19,6 @@ export interface SleepEntry {
     timestamp: bigint;
     qualityRating: bigint;
 }
-export interface DeletionSchedule {
-    deletionTime: bigint;
-    isScheduled: boolean;
-}
 export interface VibrationCommand {
     pattern: string;
     timestamp: bigint;
@@ -37,10 +33,6 @@ export interface MoodEntry {
     mood: string;
     note?: string;
     timestamp: bigint;
-}
-export interface ConsentRecord {
-    timestamp: bigint;
-    consentType: ConsentType;
 }
 export interface StressReading {
     stressLevel: StressLevel;
@@ -71,11 +63,6 @@ export interface ReminderPreferences {
     hydration: boolean;
     stretch: boolean;
 }
-export enum ConsentType {
-    privacyPolicy = "privacyPolicy",
-    dataSharing = "dataSharing",
-    termsOfService = "termsOfService"
-}
 export enum StressLevel {
     low = "low",
     high = "high",
@@ -93,16 +80,9 @@ export interface backendInterface {
     addStressReading(heartRate: bigint, skinTemp: number, motion: bigint, stressLevel: StressLevel): Promise<void>;
     addVibrationCommand(pattern: string, intensity: bigint): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    clearAnalyticsHistory(): Promise<void>;
-    deleteAccount(withRecoveryPeriod: boolean): Promise<void>;
-    deleteAllUserData(): Promise<void>;
-    deleteMoodEntry(timestamp: bigint): Promise<void>;
-    deleteStressReading(timestamp: bigint): Promise<void>;
     getBreathingSessions(): Promise<Array<BreathingSession>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getConsents(): Promise<Array<ConsentRecord>>;
-    getDeletionStatus(): Promise<DeletionSchedule | null>;
     getLatestStressReading(): Promise<StressReading | null>;
     getMoodEntriesThisWeek(): Promise<Array<MoodEntry>>;
     getReadingsWithTip(_tip: string): Promise<Array<StressReading>>;
@@ -113,11 +93,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     getVibrationCommands(): Promise<Array<VibrationCommand>>;
     getWeeklyStressAnalytics(): Promise<Array<StressReading>>;
-    hasConsented(consentType: ConsentType): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
-    logDeletionEvent(hashedIdentifier: Uint8Array): Promise<void>;
-    recordConsent(consentType: ConsentType): Promise<void>;
-    resetDevicePairing(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateReminderPrefs(hydration: boolean, breaks: boolean, stretch: boolean, intervals: bigint): Promise<void>;
     updateUserProfile(name: string, avatarId: bigint): Promise<void>;

@@ -1,203 +1,61 @@
 {
   "kind": "build_request",
-  "title": "Privacy & Data Control Section in Settings (Full Account Deletion, Selective Deletion, Data Download, Security & Compliance)",
+  "title": "Match mobile UI colors to desktop and improve cross-device responsiveness",
   "projectName": "TRANQUIL",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-3",
-      "text": "Add a 'Privacy & Data Control' section inside the Settings page. This section must contain clearly labeled sub-sections for Full Account Deletion, Selective Data Deletion, and Download My Data. Use a calm blue/teal theme consistent with the existing design tokens, clear plain-English labels, and no dark patterns.",
+      "id": "REQ-1",
+      "text": "Ensure all color tokens, backgrounds, text colors, accent colors, and component styles are consistently applied across all screen sizes (mobile, tablet, desktop) — no visual discrepancies between breakpoints. All pages (Dashboard, Breathe, Sounds, Journal, Analytics, Profile, Settings, Sleep, VibrationControl, TipsAndReminders) must render with identical color themes regardless of viewport width.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Privacy & Data Control (Inside Settings)",
-          "UI Design: Clean and minimal, Calm blue/teal theme, Clear language, No dark patterns, Privacy-first messaging"
+          "Make it same as in desktop too like colors and responsive"
         ]
       },
       "acceptanceCriteria": [
-        "Settings page contains a clearly delineated 'Privacy & Data Control' section.",
-        "Section is visually consistent with the existing blue/teal design token system.",
-        "All labels use plain, friendly English with no manipulative or misleading patterns.",
-        "Section is accessible and renders correctly on mobile (320px+), tablet (768px+), and desktop (1024px+)."
+        "Color tokens defined in frontend/src/index.css and frontend/index.css are applied uniformly at all breakpoints",
+        "Dark and light mode colors match between mobile and desktop viewports on all pages",
+        "No page has a different background, card, or text color on mobile vs desktop",
+        "Gradient, accent, and chart colors are consistent across all screen sizes"
       ]
     },
     {
-      "id": "REQ-4",
-      "text": "Implement a Full Account Deletion flow inside the Privacy & Data Control section. Show a red 'Delete Account' button. On click, open the existing DeleteAccountModal (or enhance it) to: (1) require password re-authentication, (2) support biometric confirmation via the existing useBiometricAuth hook, (3) display the warning 'This action is permanent and cannot be undone.', (4) offer an optional 7-day recovery period toggle before confirming. On confirmation, delete all user data from the backend (profile, stress logs, mood logs, sleep data, device history) by calling the appropriate backend actor methods, log a deletion event without personal data, and invalidate all active React Query sessions.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Full Account Deletion",
-          "Red 'Delete Account' button",
-          "Require password re-authentication",
-          "Support biometric confirmation",
-          "Show warning: 'This action is permanent and cannot be undone.'",
-          "Optional 7-day recovery period",
-          "When confirmed: Delete profile data, Delete stress logs, Delete mood logs, Delete sleep data, Delete device history",
-          "Invalidate active sessions",
-          "Log deletion event (without personal data)",
-          "Complete within 30 seconds"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Red 'Delete Account' button is visible in the Privacy & Data Control section.",
-        "Clicking the button opens a multi-step confirmation modal.",
-        "Modal requires either password re-authentication or biometric confirmation before proceeding.",
-        "Warning text 'This action is permanent and cannot be undone.' is prominently displayed.",
-        "A toggle for optional 7-day recovery period is shown before final confirmation.",
-        "On confirmation, all user data (profile, stress logs, mood logs, sleep data, device history) is deleted from the backend actor.",
-        "A deletion event is logged without any personally identifiable data.",
-        "All active React Query caches are invalidated after deletion.",
-        "The entire deletion flow completes within 30 seconds."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Implement Selective Data Deletion inside the Privacy & Data Control section using the existing SelectiveDataDeletionCard component (or an enhanced version). Users must be able to independently delete: individual stress log entries, individual mood entries, all analytics history, and device pairing data. Each action must show a confirmation dialog before executing and display a toast notification on success or failure.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Selective Data Deletion",
-          "Allow users to: Delete individual stress logs, Delete mood entries, Clear analytics history, Reset device data only"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Selective Data Deletion sub-section is visible inside Privacy & Data Control.",
-        "Users can delete individual stress log entries with a confirmation dialog.",
-        "Users can delete individual mood entries with a confirmation dialog.",
-        "Users can clear all analytics history with a confirmation dialog.",
-        "Users can reset/remove device pairing data with a confirmation dialog.",
-        "Toast notification is shown on successful deletion or on error.",
-        "Backend data is actually removed upon confirmed deletion."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Add a 'Download My Data' button inside the Privacy & Data Control section. When clicked, present export format options: JSON, CSV, and PDF summary. Use the existing dataExport.ts utility functions for generating the files. Trigger a secure in-app client-side download for each format. The exported data must include stress readings, mood entries, sleep data, and profile information.",
+      "id": "REQ-2",
+      "text": "Make the app fully responsive across all screen sizes (mobile 320px+, tablet 768px+, desktop 1024px+). All layouts, grids, cards, charts, and navigation elements must adapt gracefully. Pages with fixed widths or overflowing content must be corrected. The bottom navigation should remain on mobile/tablet, and a sidebar or top navigation may be introduced for desktop if appropriate.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Download My Data",
-          "Add button: 'Download My Data'",
-          "Export options: JSON, CSV, PDF summary",
-          "Secure in-app download or encrypted email."
+          "Make it same as in desktop too like colors and responsive"
         ]
       },
       "acceptanceCriteria": [
-        "'Download My Data' button is visible in the Privacy & Data Control section.",
-        "Clicking the button presents three format options: JSON, CSV, PDF summary.",
-        "Selecting JSON triggers a client-side download of all user data as a JSON file.",
-        "Selecting CSV triggers a client-side download of stress readings as a CSV file.",
-        "Selecting PDF triggers a client-side download of an HTML/PDF summary report.",
-        "Exported data includes stress readings, mood entries, sleep data, and profile info.",
-        "Export functions are sourced from the existing dataExport.ts utility."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Display security information prominently within the Privacy & Data Control section using the existing SecurityInfoCard component. The card must list: AES-256 encryption for stored data, encrypted BLE communication, Firebase Security Rules enforcement, Multi-factor authentication option, Biometric re-authentication, and HTTPS secure backend. Present this as reassurance for users, with icons and brief descriptions.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Security Requirements",
-          "Encrypted BLE communication",
-          "AES-256 encryption for stored data",
-          "Firebase Security Rules",
-          "Multi-factor authentication option",
-          "Biometric re-authentication",
-          "HTTPS secure backend"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A security information card is shown in the Privacy & Data Control section.",
-        "The card lists all six security features: AES-256, BLE encryption, Firebase Security Rules, MFA, biometric re-auth, and HTTPS.",
-        "Each feature has an icon and a brief plain-English description.",
-        "The card uses the existing SecurityInfoCard component or an equivalent styled component."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Add a Compliance sub-section within Privacy & Data Control that: (1) displays a compliance summary stating adherence to GDPR principles and Indian IT data protection standards, (2) shows the user's recorded consent timestamps for Privacy Policy and Terms & Conditions using the existing ComplianceCard component, (3) provides links to view the Privacy Policy and Terms of Service via the existing PolicyModal component, and (4) includes a privacy-first messaging statement explaining that the user has full ownership and control over their mental health data.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Compliance",
-          "Follow GDPR principles",
-          "Follow Indian IT data protection standards",
-          "Track user consent",
-          "Integrate Privacy Policy",
-          "Track Terms & Conditions acceptance",
-          "Goal: Give users full ownership and control over their mental health data."
-        ]
-      },
-      "acceptanceCriteria": [
-        "Compliance sub-section is visible in Privacy & Data Control.",
-        "A statement about GDPR and Indian IT data protection compliance is displayed.",
-        "User's consent timestamps for Privacy Policy and Terms & Conditions are shown via ComplianceCard.",
-        "Links to view the full Privacy Policy and Terms of Service open the existing PolicyModal.",
-        "A clear privacy-first statement such as 'You have full ownership and control over your mental health data.' is displayed."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Add backend actor methods to support the full account deletion flow: a deleteAllUserData function that removes all data for the calling user (profile, stress readings, mood entries, sleep entries, breathing sessions, device/vibration history) from all internal Maps in a single call, and a logDeletionEvent function that records a timestamped deletion event without storing any personal data (only a hash or anonymous identifier). Ensure these methods enforce caller-based authorization so only the authenticated user can delete their own data.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Delete profile data",
-          "Delete stress logs",
-          "Delete mood logs",
-          "Delete sleep data",
-          "Delete device history",
-          "Log deletion event (without personal data)",
-          "Complete within 30 seconds"
-        ]
-      },
-      "acceptanceCriteria": [
-        "A deleteAllUserData public method exists on the main actor that removes all records for the calling principal from every data Map.",
-        "A logDeletionEvent method records a timestamped event with no personally identifiable data.",
-        "Both methods enforce caller-based authorization — only the authenticated user may delete their own data.",
-        "Calling deleteAllUserData removes profile, stress readings, mood entries, sleep entries, breathing sessions, and device/vibration history for the user.",
-        "Methods return appropriate success/error variants."
+        "No horizontal scrollbar or overflow on any page at any standard viewport width",
+        "Grid layouts (e.g., sound tiles, stats cards) reflow correctly from 1-column mobile to 2–3 column desktop",
+        "StressChart, StressGauge, and all Recharts visualizations resize fluidly without clipping",
+        "Header and BottomNav are correctly positioned and sized on mobile, tablet, and desktop",
+        "Typography scales appropriately across breakpoints using Tailwind responsive classes",
+        "All forms, sliders, and modals (e.g., ProfileSetupModal) are usable and correctly sized on all screen widths",
+        "EmergencyCalmOverlay fills the screen correctly on all device sizes"
       ]
     }
   ],
   "constraints": [
-    "All user-facing text must be in English.",
-    "Do not modify files listed in frontend.immutablePaths.",
-    "Reuse existing components (DeleteAccountModal, SelectiveDataDeletionCard, SecurityInfoCard, ComplianceCard, PolicyModal, useBiometricAuth, dataExport.ts) wherever possible rather than creating duplicates.",
-    "Do not introduce Firebase, external databases, or cloud functions — all backend logic must remain in the single Motoko actor.",
-    "The blue/teal calm theme must be consistent with existing CSS custom properties and Tailwind design tokens.",
-    "No dark patterns in UI — all destructive actions require explicit multi-step confirmation."
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "Do not change the backend schema or Motoko logic",
+    "Preserve all existing design tokens and OKLCH color palette — only fix inconsistent application of them"
   ],
   "nonGoals": [
-    "Direct Firebase Firestore or Firebase Authentication integration (not supported on this platform).",
-    "Actual Cloud Function triggers or serverless backend calls.",
-    "Real encrypted email delivery for data exports.",
-    "Real-time WebSocket session invalidation.",
-    "SMS or push notification alerts for deletion events.",
-    "External third-party MFA providers (only in-app biometric/password re-auth is in scope)."
+    "Adding new features or pages",
+    "Changing the visual design language or color palette itself",
+    "Adding Internet Identity login changes",
+    "Backend modifications"
   ],
   "imageRequirements": {
     "required": [],
