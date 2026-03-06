@@ -2,13 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, Edit2, LogOut, X } from "lucide-react";
+import { Check, Edit2, LogOut, Sparkles, X } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   AVATAR_EMOJIS_LIST,
   AvatarSelector,
 } from "../components/AvatarSelector";
+import { ProfileSetupModal } from "../components/ProfileSetupModal";
 import { ProfileStats } from "../components/ProfileStats";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
@@ -25,6 +26,7 @@ export function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [editAvatarId, setEditAvatarId] = useState(1);
+  const [showSetupModal, setShowSetupModal] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -201,10 +203,57 @@ export function Profile() {
           </div>
         </>
       ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          <p className="text-3xl mb-2">👤</p>
-          <p className="text-sm">Profile not found</p>
-        </div>
+        <>
+          {/* Welcoming profile setup card */}
+          <div className="flex flex-col items-center gap-6 py-6">
+            {/* Avatar placeholder */}
+            <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center text-5xl border-2 border-primary/20 shadow-soft animate-pulse-slow">
+              🌸
+            </div>
+
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold font-display text-foreground">
+                Welcome to TRANQUIL 🌸
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+                Complete your profile to unlock personalized stress tracking,
+                wellness tips, and your calm companion experience.
+              </p>
+            </div>
+
+            {/* Feature highlights */}
+            <div className="w-full space-y-2">
+              {[
+                { emoji: "📊", text: "Personalized stress analytics" },
+                { emoji: "💡", text: "AI-powered wellness tips" },
+                { emoji: "🧘", text: "Guided breathing sessions" },
+              ].map((item) => (
+                <div
+                  key={item.text}
+                  className="flex items-center gap-3 p-3 bg-card rounded-2xl border border-border"
+                >
+                  <span className="text-lg">{item.emoji}</span>
+                  <span className="text-sm text-foreground font-medium">
+                    {item.text}
+                  </span>
+                  <Sparkles size={12} className="ml-auto text-primary/60" />
+                </div>
+              ))}
+            </div>
+
+            <Button
+              data-ocid="profile.primary_button"
+              onClick={() => setShowSetupModal(true)}
+              className="w-full rounded-xl py-5 font-bold text-base"
+              size="lg"
+            >
+              Set Up My Profile 🌿
+            </Button>
+          </div>
+
+          {/* Inline ProfileSetupModal triggered from this page */}
+          {showSetupModal && <ProfileSetupModal open={showSetupModal} />}
+        </>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { TipCard as TipCardType } from "../backend";
 import { ReminderToggle } from "../components/ReminderToggle";
 import { TipCard } from "../components/TipCard";
 import {
@@ -8,6 +9,33 @@ import {
   useTips,
   useUpdateReminderPrefs,
 } from "../hooks/useQueries";
+
+const FALLBACK_TIPS: TipCardType[] = [
+  {
+    title: "Stay Hydrated",
+    description:
+      "Drink a glass of water every hour to keep your mind sharp and stress levels low.",
+    category: "wellness",
+  },
+  {
+    title: "Take a 5-Minute Break",
+    description:
+      "Step away from screens every 50 minutes. A short walk or stretch can reset your focus.",
+    category: "break",
+  },
+  {
+    title: "Try Box Breathing",
+    description:
+      "Inhale 4s, hold 4s, exhale 4s, hold 4s. Repeat 4 times to calm your nervous system.",
+    category: "breathing",
+  },
+  {
+    title: "Mindful Moment",
+    description:
+      "Close your eyes for 60 seconds. Focus only on your breathing. Notice how much calmer you feel.",
+    category: "mindfulness",
+  },
+];
 
 export function TipsAndReminders() {
   const { data: tips, isLoading: tipsLoading } = useTips();
@@ -73,16 +101,11 @@ export function TipsAndReminders() {
               <Skeleton key={i} className="h-20 rounded-2xl" />
             ))}
           </div>
-        ) : tips && tips.length > 0 ? (
+        ) : (
           <div className="space-y-3">
-            {tips.map((tip, i) => (
+            {(tips && tips.length > 0 ? tips : FALLBACK_TIPS).map((tip, i) => (
               <TipCard key={tip.title} tip={tip} index={i} />
             ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="text-3xl mb-2">💡</p>
-            <p className="text-sm">No tips available right now</p>
           </div>
         )}
       </div>

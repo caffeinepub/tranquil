@@ -61,7 +61,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return (
     <>
       {showProfileSetup && <ProfileSetupModal open={true} />}
-      {!showProfileSetup && children}
+      {children}
     </>
   );
 }
